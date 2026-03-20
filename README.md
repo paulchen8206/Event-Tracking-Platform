@@ -16,6 +16,27 @@ The platform is intended to support two broad consumer groups:
 - Customer-facing analytics products and reporting experiences
 - Internal operational mail-tracking and workflow monitoring
 
+## Tech Stack
+
+- Application framework: Java Spring Boot
+- Runtime and packaging: Java 17, Python 3, Maven
+- Workflow orchestration: Apache Airflow
+- Streaming and messaging: Apache Kafka, Kafka Connect, Schema Registry
+- Stream processing: Apache Flink
+- Lakehouse and analytics processing: Apache Spark Structured Streaming, Apache Iceberg
+- Transformation and semantic modeling: dbt
+- Data warehouse: Snowflake
+- Operational datastore and CDC source: PostgreSQL, Debezium-style CDC patterns
+- Search and operational dashboards: Elasticsearch, Kibana
+- Object storage (local dev): MinIO (S3-compatible)
+- Infrastructure and deployment: Docker Compose, Kubernetes, Helm
+
+## License announcement
+
+This repository currently does not include an open-source license file.
+
+Unless and until a LICENSE file is added, all rights are reserved by the repository owner.
+
 ## Repository layout
 
 ```text
