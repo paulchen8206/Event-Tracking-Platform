@@ -2,6 +2,21 @@
 
 Starter saved-object assets for operational dashboards.
 
+## Internal Mail Tracking Operational Dashboard
+
+- Data view index pattern: `internal-mail-tracking*`
+- Time field: `@timestamp` (populated by the `internal-mail-tracking-pipeline` ingest pipeline)
+- Dashboard file: `internal-mail-tracking-operational-dashboard.json`
+
+The dashboard JSON is a starter payload containing:
+
+- Data view definition for the main operational tracking index
+- Area chart for event volume over time
+- Bar chart for event type distribution
+- Pie chart for delivery status breakdown
+- Bar chart for top active tenants (by event count)
+- Recent events data table (timestamp, type, tenant, message ID, status, provider, processing stage)
+
 ## Internal Mail Tracking Dead-Letter Dashboard
 
 - Data view index pattern: `internal-mail-tracking-deadletter*`
@@ -16,14 +31,16 @@ The dashboard JSON is a starter payload containing:
 
 ## Import Notes
 
-Use Kibana Saved Objects import UI or API to load these objects, then adjust panel settings for your Kibana version.
-
-Example import API call (requires `kbn-xsrf` header):
+Use `make dev-kibana-import` to import both dashboards in one command, or import individually with the Saved Objects API:
 
 ```bash
 curl -sS -X POST "http://localhost:5601/api/saved_objects/_import?overwrite=true" \
   -H "kbn-xsrf: true" \
-  -F file=@/path/to/export.ndjson
+  -F file=@storage/elasticsearch/kibana/internal-mail-tracking-operational-dashboard.json
+
+curl -sS -X POST "http://localhost:5601/api/saved_objects/_import?overwrite=true" \
+  -H "kbn-xsrf: true" \
+  -F file=@storage/elasticsearch/kibana/internal-mail-tracking-deadletter-dashboard.json
 ```
 
-If your deployment requires NDJSON, convert the exported objects in `internal-mail-tracking-deadletter-dashboard.json` to one object per line.
+Kibana version note: starter assets target Kibana 8.x saved object format. Adjust `migrationVersion` fields if deploying against a different major version.

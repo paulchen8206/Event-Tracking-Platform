@@ -33,7 +33,9 @@ flowchart LR
         end
 
         subgraph NSD[<env>-data-airflow]
-            AIRFLOW[Airflow/dbt runners]
+            AIRFLOW[Airflow DAGs]
+            SPARK[Spark Lakehouse Consumer]
+            DBT[dbt Semantic Layer]
         end
     end
 
@@ -42,8 +44,12 @@ flowchart LR
     FTM --> KAFKA
     KCONNECT --> KAFKA
     KCONNECT --> ES[(Elasticsearch)]
-    AIRFLOW --> SNOW[(Snowflake)]
-    FTM --> S3[(S3/Iceberg)]
+    KAFKA --> SPARK
+    SPARK --> S3[(S3/Iceberg)]
+    S3 --> SNOW[(Snowflake)]
+    AIRFLOW --> SPARK
+    AIRFLOW --> DBT
+    DBT --> SNOW
     SVCAPI --> SNOW
     SVCAPI --> ES
     O11Y -. metrics/logs .-> KAFKA

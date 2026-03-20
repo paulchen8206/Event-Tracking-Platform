@@ -114,11 +114,14 @@ Open these URLs:
 - Kafka UI: http://localhost:8080
 - Spark UI: http://localhost:4040
 - Flink Dashboard: http://localhost:8088
+- Elasticsearch: http://localhost:9200
+- Kibana: http://localhost:5601
 
 Notes:
 
 - `http://localhost:8081` is Schema Registry in this Compose stack.
 - The Flink Dashboard is intentionally mapped to `8088` to avoid that conflict.
+- Elasticsearch and Kibana require the `dev-observability` profile (see section below).
 
 You can also inspect the routed topics directly:
 
@@ -133,6 +136,60 @@ docker compose -f infra/docker/docker-compose.kafka.yml exec kafka kafka-console
 ```bash
 make dev-stack-down
 ```
+
+## Elasticsearch and Kibana (Operational Dashboards)
+
+The Compose file includes a `dev-observability` profile with Elasticsearch 8.13 and Kibana 8.13. These services power the Kafka Connect → ES → Kibana operational dashboard path.
+
+```bash
+make dev-observability-up   # start Elasticsearch (9200) and Kibana (5601)
+make dev-es-setup           # register ingest pipeline + apply index templates
+```
+
+Then register the Kafka Connect sink connectors (see `platform/kafka/connect/README.md`):
+
+```bash
+curl -sS -X PUT \
+  http://localhost:8083/connectors/internal-mail-tracking-elasticsearch-sink/config \
+  -H 'Content-Type: application/json' \
+  --data @platform/kafka/connect/elasticsearch/internal-mail-tracking-sink.json
+
+curl -sS -X PUT \
+  http://localhost:8083/connectors/internal-mail-tracking-deadletter-elasticsearch-sink/config \
+  -H 'Content-Type: application/json' \
+  --data @platform/kafka/connect/elasticsearch/internal-mail-tracking-deadletter-sink.json
+```
+
+Import Kibana dashboards:
+
+```bash
+make dev-kibana-import
+```
+
+Open Kibana at http://localhost:5601. The **Internal Mail Tracking Operational Overview** dashboard gives real-time visibility into event volume, type distribution, tenant activity, and delivery status. The **DLQ** dashboard monitors malformed records routed through Kafka Connect dead-letter handling.
+
+Stop the observability stack:
+
+```bash
+make dev-observability-down
+```
+
+## dbt Semantic Layer (Snowflake)
+
+The Compose file includes an optional `dev-dbt` profile that runs dbt against Snowflake. It is independent of the Kafka stack and can be started at any time.
+
+Copy `.env.example` to `.env` at the repository root and fill in your Snowflake credentials before running any dbt targets.
+
+```bash
+make dev-dbt-up           # start the container
+make dev-dbt-deps         # install dbt package dependencies
+make dev-dbt-debug        # verify Snowflake connectivity
+make dev-dbt-seed-large   # load 12 000-row synthetic data into Snowflake source tables
+make dev-dbt-build        # build all staging and mart models
+make dev-dbt-down         # stop the container
+```
+
+See [platform/dbt/README.md](../../platform/dbt/README.md) for full details.
 
 ## Related documents
 

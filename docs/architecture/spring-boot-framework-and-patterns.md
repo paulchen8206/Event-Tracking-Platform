@@ -99,8 +99,13 @@ flowchart LR
 
     CANON --> FLINK[Stream Processing Layer]
     FLINK --> DASH[(Dashboard Topic)]
+    FLINK --> CUST[(evt.mail.customer.analytics)]
     DASH --> KCONN[Kafka Connect Sink]
     KCONN --> ES[(Elasticsearch)]
+    CUST --> SPARK[Canonical Lakehouse Consumer]
+    SPARK --> S3[(S3 + Iceberg)]
+    S3 --> DBT[dbt Semantic Layer]
+    DBT --> SNOW[(Snowflake)]
 
     DLQ --> KDLQ[DLQ Connector]
     KDLQ --> ESDLQ[(Dead-Letter Index)]

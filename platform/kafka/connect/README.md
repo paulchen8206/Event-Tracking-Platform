@@ -2,6 +2,17 @@
 
 Connector definitions that bridge internal Kafka topics to downstream systems.
 
+## Prerequisites
+
+Elasticsearch must be running and the index templates must be applied before registering the sink connectors, otherwise the connector will write to auto-created indices with incorrect mappings.
+
+```bash
+make dev-observability-up   # start Elasticsearch and Kibana
+make dev-es-setup           # register ingest pipeline + apply index templates
+```
+
+See `storage/elasticsearch/README.md` for manual setup steps.
+
 ## Realtime Elasticsearch sink
 
 - Connector file: `elasticsearch/internal-mail-tracking-sink.json`

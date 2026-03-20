@@ -1,3 +1,24 @@
+x-event-producer-common: &event_producer_common
+  profiles:
+    - dev-producers
+  image: etp-event-producers:dev
+  build:
+    context: ../../services/event-producers
+    dockerfile: Dockerfile
+  depends_on:
+    kafka:
+      condition: service_healthy
+    producers-topic-init:
+      condition: service_completed_successfully
+  healthcheck: &event_producer_healthcheck
+    test:
+      - CMD-SHELL
+      - test -f /tmp/event-producer.status && grep -Eq 'ready|running|completed' /tmp/event-producer.status
+    interval: 10s
+    timeout: 5s
+    retries: 12
+    start_period: 20s
+
 services:
   kafka:
     image: confluentinc/cp-kafka:8.1.2
@@ -94,6 +115,44 @@ services:
         /etc/confluent/docker/run
 
   # ── Local Flink dashboard runtime (UI only for monitoring) ─────────────────
+  # ── Elasticsearch + Kibana for operational dashboards ─────────────────────
+
+  elasticsearch:
+    profiles:
+      - dev-observability
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
+    container_name: etp-elasticsearch
+    hostname: elasticsearch
+    ports:
+      - "9200:9200"
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: "false"
+      xpack.security.http.ssl.enabled: "false"
+      ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:9200/_cluster/health | grep -v '\"status\":\"red\"'"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+
+  kibana:
+    profiles:
+      - dev-observability
+    image: docker.elastic.co/kibana/kibana:8.13.4
+    container_name: etp-kibana
+    hostname: kibana
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    ports:
+      - "5601:5601"
+    environment:
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+      SERVER_NAME: kibana
+
+  # ── Local Flink dashboard runtime (UI only for monitoring) ─────────────────
 
   flink-jobmanager:
     profiles:
@@ -127,18 +186,31 @@ services:
         jobmanager.rpc.address: flink-jobmanager
         taskmanager.numberOfTaskSlots: 4
 
-  cdc-event-producer:
+  # One-shot container: ensures producer input topics exist before producers start
+  producers-topic-init:
     profiles:
       - dev-producers
-    build:
-      context: ../../services/event-producers
-      dockerfile: Dockerfile
-    image: etp-event-producers:dev
-    container_name: etp-cdc-event-producer
-    hostname: cdc-event-producer
+    image: confluentinc/cp-kafka:8.1.2
+    container_name: etp-producers-topic-init
     depends_on:
       kafka:
         condition: service_healthy
+    entrypoint:
+      - /bin/bash
+      - -ec
+      - |
+        kafka-topics --bootstrap-server kafka:29092 --create --if-not-exists --topic dbz.postgres.mail.public.mail_events --partitions 1 --replication-factor 1
+        kafka-topics --bootstrap-server kafka:29092 --create --if-not-exists --topic evt.mail.lifecycle.raw --partitions 1 --replication-factor 1
+        kafka-topics --bootstrap-server kafka:29092 --create --if-not-exists --topic evt.mail.operational.raw --partitions 1 --replication-factor 1
+        kafka-topics --bootstrap-server kafka:29092 --create --if-not-exists --topic evt.mail.internal.tracking --partitions 1 --replication-factor 1
+        kafka-topics --bootstrap-server kafka:29092 --create --if-not-exists --topic evt.mail.internal.tracking.dashboard --partitions 1 --replication-factor 1
+        kafka-topics --bootstrap-server kafka:29092 --create --if-not-exists --topic evt.mail.internal.tracking.health --partitions 1 --replication-factor 1
+        kafka-topics --bootstrap-server kafka:29092 --create --if-not-exists --topic evt.mail.customer.analytics --partitions 1 --replication-factor 1
+
+  cdc-event-producer:
+    <<: *event_producer_common
+    container_name: etp-cdc-event-producer
+    hostname: cdc-event-producer
     environment:
       KAFKA_BOOTSTRAP_SERVERS: kafka:29092
       PRODUCER_MODE: cdc
@@ -152,13 +224,10 @@ services:
       STATUS_FILE_PATH: /tmp/cdc-event-producer.status
       CDC_TARGET_TOPIC: dbz.postgres.mail.public.mail_events
     healthcheck:
+      <<: *event_producer_healthcheck
       test:
         - CMD-SHELL
         - test -f /tmp/cdc-event-producer.status && grep -Eq 'ready|running|completed' /tmp/cdc-event-producer.status
-      interval: 10s
-      timeout: 5s
-      retries: 12
-      start_period: 20s
 
   # ── Local S3-compatible store for Iceberg ──────────────────────────────────
 
@@ -170,10 +239,10 @@ services:
     hostname: minio
     ports:
       - "9000:9000"   # S3 API
-      - "9001:9001"   # Console UI (http://localhost:9001  admin/minioadmin)
+      - "9001:9001"   # Console UI (http://localhost:9001)
     environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
     command: server /data --console-address ":9001"
 
   # One-shot container: creates the lakehouse bucket then exits 0
@@ -187,7 +256,7 @@ services:
         condition: service_started
     entrypoint: >
       /bin/sh -c "
-        until mc alias set local http://minio:9000 minioadmin minioadmin; do
+        until mc alias set local http://minio:9000 ${MINIO_ROOT_USER:-minioadmin} ${MINIO_ROOT_PASSWORD:-minioadmin}; do
           echo 'Waiting for MinIO...'
           sleep 2
         done
@@ -196,6 +265,20 @@ services:
       "
 
   # ── Canonical lakehouse consumer (Spark Structured Streaming → Iceberg) ───
+
+  # One-shot container: ensures the analytics topic exists before Spark starts
+  lakehouse-topic-init:
+    profiles:
+      - dev-lakehouse
+    image: confluentinc/cp-kafka:8.1.2
+    container_name: etp-lakehouse-topic-init
+    depends_on:
+      kafka:
+        condition: service_healthy
+    entrypoint:
+      - /bin/bash
+      - -ec
+      - kafka-topics --bootstrap-server kafka:29092 --create --if-not-exists --topic ${LAKEHOUSE_KAFKA_TOPIC:-evt.mail.customer.analytics} --partitions 1 --replication-factor 1
 
   canonical-lakehouse-consumer:
     profiles:
@@ -213,6 +296,8 @@ services:
         condition: service_healthy
       minio-init:
         condition: service_completed_successfully
+      lakehouse-topic-init:
+        condition: service_completed_successfully
     environment:
       SPARK_MASTER: local[*]
       SPARK_UI_ENABLED: "true"
@@ -222,8 +307,8 @@ services:
       ICEBERG_WAREHOUSE: s3a://event-tracking-lakehouse/warehouse
       SPARK_CHECKPOINT_LOCATION: ${LAKEHOUSE_CHECKPOINT_LOCATION:-s3a://event-tracking-lakehouse/checkpoints/customer-analytics-v2/tableau-reporting-events}
       S3_ENDPOINT: http://minio:9000
-      S3_ACCESS_KEY: minioadmin
-      S3_SECRET_KEY: minioadmin
+      S3_ACCESS_KEY: ${MINIO_ROOT_USER:-minioadmin}
+      S3_SECRET_KEY: ${MINIO_ROOT_PASSWORD:-minioadmin}
       S3_PATH_STYLE_ACCESS: "true"
     healthcheck:
       test: ["CMD-SHELL", "kill -0 1 2>/dev/null || exit 1"]
@@ -232,18 +317,33 @@ services:
       retries: 5
       start_period: 90s
 
-  mail-tracking-event-producer:
+  # ── dbt Semantic Layer runtime (Snowflake adapter) ───────────────────────
+
+  dbt-snowflake:
     profiles:
-      - dev-producers
-    image: etp-event-producers:dev
+      - dev-dbt
     build:
-      context: ../../services/event-producers
+      context: ../../platform/dbt
       dockerfile: Dockerfile
+    image: etp-dbt-snowflake:dev
+    container_name: etp-dbt-snowflake
+    working_dir: /usr/app
+    env_file:
+      - ../../.env
+    volumes:
+      - ../../platform/dbt:/usr/app
+    environment:
+      DBT_PROFILES_DIR: /usr/app
+      DBT_TARGET: ${DBT_TARGET:-dev}
+    command:
+      - /bin/sh
+      - -lc
+      - cp -n profiles.example.yml profiles.yml && tail -f /dev/null
+
+  mail-tracking-event-producer:
+    <<: *event_producer_common
     container_name: etp-mail-tracking-event-producer
     hostname: mail-tracking-event-producer
-    depends_on:
-      kafka:
-        condition: service_healthy
     environment:
       KAFKA_BOOTSTRAP_SERVERS: kafka:29092
       PRODUCER_MODE: mail-tracking
@@ -257,10 +357,7 @@ services:
       STATUS_FILE_PATH: /tmp/mail-tracking-event-producer.status
       MAIL_TRACKING_TARGET_TOPIC: evt.mail.operational.raw
     healthcheck:
+      <<: *event_producer_healthcheck
       test:
         - CMD-SHELL
         - test -f /tmp/mail-tracking-event-producer.status && grep -Eq 'ready|running|completed' /tmp/mail-tracking-event-producer.status
-      interval: 10s
-      timeout: 5s
-      retries: 12
-      start_period: 20s

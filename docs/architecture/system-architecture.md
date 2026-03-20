@@ -23,6 +23,7 @@ flowchart LR
 
     subgraph Event Backbone
         KRAW[(evt.mail.operational.raw)]
+        KCAN[(evt.mail.customer.analytics)]
         KNORM[(evt.mail.internal.tracking)]
         KDASH[(evt.mail.internal.tracking.dashboard)]
         KDLQ[(evt.mail.internal.tracking.dashboard.dlq)]
@@ -30,6 +31,11 @@ flowchart LR
 
     subgraph Stream Processing
         FLINK[Operational Flink Router]
+    end
+
+    subgraph Lakehouse Processing
+        SPARK[Canonical Lakehouse Consumer]
+        S3ICE[(S3 + Iceberg)]
     end
 
     subgraph Sink Integration
@@ -40,8 +46,14 @@ flowchart LR
     subgraph Serving Stores
         ESMAIN[(internal-mail-tracking)]
         ESDLQ[(internal-mail-tracking-deadletter)]
-        S3ICE[(S3 + Iceberg)]
-        SNOW[(Snowflake)]
+        SNOWICE[(Snowflake
+ICEBERG_CUSTOMER_ANALYTICS)]
+        SNOWMART[(Snowflake
+ANALYTICS_SEMANTIC_DEV)]
+    end
+
+    subgraph Transformation
+        DBT[dbt Semantic Layer]
     end
 
     subgraph Consumers
@@ -54,6 +66,7 @@ flowchart LR
     PSQL --> KRAW
     APIIN --> KRAW
     KRAW --> FLINK
+    FLINK --> KCAN
     FLINK --> KNORM
     FLINK --> KDASH
     KDASH --> KCMAIN
@@ -64,10 +77,13 @@ flowchart LR
     ESMAIN --> KIBANA
     ESDLQ --> KIBANA
 
-    KNORM --> S3ICE
-    S3ICE --> SNOW
-    SNOW --> TABLEAU
-    SNOW --> SAPI
+    KCAN --> SPARK
+    SPARK --> S3ICE
+    S3ICE --> SNOWICE
+    SNOWICE --> DBT
+    DBT --> SNOWMART
+    SNOWMART --> TABLEAU
+    SNOWMART --> SAPI
     ESMAIN --> SAPI
 ```
 

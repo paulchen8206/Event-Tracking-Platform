@@ -1,0 +1,32 @@
+{
+  "title": "Internal Mail Tracking Operational Dashboard",
+  "description": "Starter Kibana saved object payload for real-time visibility into mail event volume, type distribution, tenant activity, and delivery status.",
+  "kibana_saved_objects": {
+    "version": "8.x",
+    "exported_objects": [
+      {
+        "type": "index-pattern",
+        "id": "internal-mail-tracking-data-view",
+        "attributes": {
+          "title": "internal-mail-tracking*",
+          "timeFieldName": "@timestamp"
+        }
+      },
+      {
+        "type": "dashboard",
+        "id": "internal-mail-tracking-operational-overview",
+        "attributes": {
+          "title": "Internal Mail Tracking Operational Overview",
+          "description": "Operational dashboard for real-time visibility into mail event volume, type distribution, tenant activity, and delivery status.",
+          "filters": [],
+          "kibanaSavedObjectMeta": {
+            "searchSourceJSON": "{\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+          },
+          "optionsJSON": "{\"useMargins\":true,\"syncColors\":false,\"syncCursor\":true,\"syncTooltips\":false}",
+          "timeRestore": false,
+          "panelsJSON": "[{\"version\":\"8.x\",\"type\":\"visualization\",\"gridData\":{\"x\":0,\"y\":0,\"w\":48,\"h\":15,\"i\":\"1\"},\"panelIndex\":\"1\",\"embeddableConfig\":{\"title\":\"Event Volume Over Time\",\"vis\":{\"type\":\"area\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"date_histogram\",\"schema\":\"segment\",\"params\":{\"field\":\"@timestamp\",\"useNormalizedOpenSearchInterval\":true,\"interval\":\"auto\",\"drop_partials\":false,\"min_doc_count\":1,\"extended_bounds\":{}}}]}}},{\"version\":\"8.x\",\"type\":\"visualization\",\"gridData\":{\"x\":0,\"y\":15,\"w\":24,\"h\":15,\"i\":\"2\"},\"panelIndex\":\"2\",\"embeddableConfig\":{\"title\":\"Events by Type\",\"vis\":{\"type\":\"histogram\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"event_type\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":10,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\"}}]}}},{\"version\":\"8.x\",\"type\":\"visualization\",\"gridData\":{\"x\":24,\"y\":15,\"w\":24,\"h\":15,\"i\":\"3\"},\"panelIndex\":\"3\",\"embeddableConfig\":{\"title\":\"Status Distribution\",\"vis\":{\"type\":\"pie\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"status\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":10,\"otherBucket\":false}}]}}},{\"version\":\"8.x\",\"type\":\"visualization\",\"gridData\":{\"x\":0,\"y\":30,\"w\":48,\"h\":15,\"i\":\"4\"},\"panelIndex\":\"4\",\"embeddableConfig\":{\"title\":\"Top Active Tenants\",\"vis\":{\"type\":\"histogram\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"tenant_id\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":20,\"otherBucket\":false}}]}}},{\"version\":\"8.x\",\"type\":\"search\",\"gridData\":{\"x\":0,\"y\":45,\"w\":48,\"h\":15,\"i\":\"5\"},\"panelIndex\":\"5\",\"embeddableConfig\":{\"title\":\"Recent Events\",\"columns\":[\"@timestamp\",\"event_type\",\"tenant_id\",\"message_id\",\"status\",\"provider\",\"processing_stage\"],\"sort\":[[\"@timestamp\",\"desc\"]]}}]"
+        }
+      }
+    ]
+  }
+}

@@ -24,6 +24,13 @@ flowchart LR
         FLINK[Flink Jobs]
         SCHEMA[Shared Event Contracts]
         KINT[(Internal Kafka Topics)]
+        KCAN[(evt.mail.customer.analytics)]
+    end
+
+    subgraph LakehouseProcessing
+        SPARK[Canonical Lakehouse Consumer
+Spark Structured Streaming]
+        S3[(S3 + Iceberg)]
     end
 
     subgraph Integration
@@ -32,18 +39,19 @@ flowchart LR
 
     subgraph Orchestration
         AIRFLOW[Airflow DAGs]
-        DBT[dbt Models]
+        DBT[dbt Semantic Layer]
     end
 
     subgraph Serving
         SNOW[(Snowflake)]
         ES[(Elasticsearch)]
+        KIBANA[Kibana Dashboards]
         SAPI[Serving API]
     end
 
     subgraph Consumers
         CUST[Customer Analytics]
-        OPS[Internal Mail Tracking]
+        OPS[Internal Mail Tracking\n Operations Team]
     end
 
     APP --> API
@@ -56,16 +64,21 @@ flowchart LR
     SCHEMA --> CDC
     SCHEMA --> FLINK
     FLINK --> KINT
+    FLINK --> KCAN
     KINT --> KCONN
     KCONN --> ES
-    FLINK --> SNOW
+    ES --> KIBANA
+    KIBANA --> OPS
+    KCAN --> SPARK
+    SPARK --> S3
+    S3 --> SNOW
+    AIRFLOW --> SPARK
     AIRFLOW --> DBT
     DBT --> SNOW
     KAFKA -. replay/backfill .-> AIRFLOW
     SNOW --> SAPI
     ES --> SAPI
     SNOW --> CUST
-    ES --> OPS
     SAPI --> CUST
     SAPI --> OPS
 ```

@@ -86,6 +86,7 @@ Unless and until a LICENSE file is added, all rights are reserved by the reposit
 ### storage/
 
 - `elasticsearch/`: Index templates and ingest pipelines
+- `snowflake/`: Schema DDL and data seeding scripts for Snowflake source tables in local and dev environments
 
 ### shared/
 
@@ -137,6 +138,10 @@ Unless and until a LICENSE file is added, all rights are reserved by the reposit
 - `platform/dbt/models/staging/customer_analytics/` and `platform/dbt/models/intermediate/customer_analytics/`: Snowflake semantic layer on top of Iceberg-backed customer analytics tables for Tableau
 - `platform/dbt/profiles.example.yml`: Example Snowflake dbt profile for semantic-layer deployment across dev/staging/production
 - `platform/dbt/packages.yml`: dbt utility packages used for semantic-layer tests and helpers
+- `storage/snowflake/schemas/sf_tuts_customer_analytics_sources.sql`: Idempotent DDL bootstrap for the Snowflake source schema and all four source tables in local dev
+- `storage/snowflake/schemas/sf_tuts_customer_analytics_seed_data.sql`: Small sample dataset (6 rows) for smoke-testing the dbt semantic layer
+- `storage/snowflake/schemas/sf_tuts_customer_analytics_generate_large_data.sql`: Large synthetic data generator (12 000+ rows, 80 tenants, 45-day window) for realistic Tableau dashboard testing; run via `make dev-dbt-seed-large`
+- `.env.example`: Template for local Snowflake credentials loaded by the dbt Docker Compose service
 
 ## How To Use This Structure
 
@@ -153,4 +158,3 @@ Unless and until a LICENSE file is added, all rights are reserved by the reposit
 - Local development stack hardening for repeatable smoke tests and observability
 - CI pipelines and release automation workflows
 - Base Terraform module definitions and environment variable conventions
-- Initial Kafka schemas, Flink job skeletons, Airflow DAGs, and dbt project config

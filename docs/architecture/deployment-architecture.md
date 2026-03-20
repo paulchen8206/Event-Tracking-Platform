@@ -13,7 +13,7 @@ flowchart TB
     subgraph LocalDeveloperMachine
         DEV[Developer Workstation]
         MK[Minikube etp-dev\nDocker Driver]
-        DC[Docker Compose\nKafka + Schema Registry + Kafka UI + Kafka Connect]
+        DC[Docker Compose\nKafka + Schema Registry + Kafka UI\nKafka Connect + dbt Snowflake]
     end
 
     subgraph SharedKubernetes
