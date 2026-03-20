@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.internal/contracts/events/mail.delivered.schema.json",
+  "title": "Mail Delivered Event",
+  "allOf": [
+    {
+      "$ref": "./envelope.schema.json"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_type": {
+          "const": "mail.delivered"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["provider", "provider_message_id", "delivery_status"],
+          "properties": {
+            "provider": {
+              "type": "string"
+            },
+            "provider_message_id": {
+              "type": "string"
+            },
+            "delivery_status": {
+              "type": "string",
+              "const": "delivered"
+            },
+            "delivered_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "provider_latency_ms": {
+              "type": ["integer", "null"],
+              "minimum": 0
+            }
+          }
+        }
+      }
+    }
+  ]
+}

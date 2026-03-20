@@ -1,0 +1,266 @@
+services:
+  kafka:
+    image: confluentinc/cp-kafka:8.1.2
+    container_name: etp-kafka
+    hostname: kafka
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+    environment:
+      CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://0.0.0.0:9092,CONTROLLER://kafka:29093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:29093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - kafka-topics --bootstrap-server kafka:29092 --list >/dev/null 2>&1
+      interval: 10s
+      timeout: 10s
+      retries: 10
+
+  schema-registry:
+    image: confluentinc/cp-schema-registry:8.1.2
+    container_name: etp-schema-registry
+    hostname: schema-registry
+    depends_on:
+      kafka:
+        condition: service_healthy
+    ports:
+      - "8081:8081"
+    environment:
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka:29092
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:v0.7.2
+    container_name: etp-kafka-ui
+    depends_on:
+      schema-registry:
+        condition: service_started
+    ports:
+      - "8080:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
+      KAFKA_CLUSTERS_0_SCHEMAREGISTRY: http://schema-registry:8081
+
+  kafka-connect:
+    image: confluentinc/cp-kafka-connect:8.1.2
+    container_name: etp-kafka-connect
+    hostname: kafka-connect
+    depends_on:
+      kafka:
+        condition: service_healthy
+      schema-registry:
+        condition: service_started
+    ports:
+      - "8083:8083"
+    environment:
+      CONNECT_BOOTSTRAP_SERVERS: kafka:29092
+      CONNECT_REST_ADVERTISED_HOST_NAME: kafka-connect
+      CONNECT_REST_PORT: 8083
+      CONNECT_GROUP_ID: kafka-connect-etp
+      CONNECT_CONFIG_STORAGE_TOPIC: _connect-configs
+      CONNECT_OFFSET_STORAGE_TOPIC: _connect-offsets
+      CONNECT_STATUS_STORAGE_TOPIC: _connect-status
+      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_KEY_CONVERTER: org.apache.kafka.connect.storage.StringConverter
+      CONNECT_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      CONNECT_VALUE_CONVERTER_SCHEMAS_ENABLE: "false"
+      CONNECT_INTERNAL_KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      CONNECT_INTERNAL_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      CONNECT_INTERNAL_KEY_CONVERTER_SCHEMAS_ENABLE: "false"
+      CONNECT_INTERNAL_VALUE_CONVERTER_SCHEMAS_ENABLE: "false"
+      CONNECT_PLUGIN_PATH: /usr/share/java,/usr/share/confluent-hub-components
+    command:
+      - /bin/bash
+      - -c
+      - |
+        confluent-hub install --no-prompt confluentinc/kafka-connect-elasticsearch:15.1.1
+        /etc/confluent/docker/run
+
+  # ── Local Flink dashboard runtime (UI only for monitoring) ─────────────────
+
+  flink-jobmanager:
+    profiles:
+      - dev-flink-ui
+    image: flink:1.20.1-scala_2.12-java17
+    container_name: etp-flink-jobmanager
+    hostname: flink-jobmanager
+    depends_on:
+      kafka:
+        condition: service_healthy
+    command: jobmanager
+    ports:
+      - "8088:8081" # Flink Dashboard UI (http://localhost:8088)
+    environment:
+      FLINK_PROPERTIES: |
+        jobmanager.rpc.address: flink-jobmanager
+        rest.port: 8081
+
+  flink-taskmanager:
+    profiles:
+      - dev-flink-ui
+    image: flink:1.20.1-scala_2.12-java17
+    container_name: etp-flink-taskmanager
+    hostname: flink-taskmanager
+    depends_on:
+      flink-jobmanager:
+        condition: service_started
+    command: taskmanager
+    environment:
+      FLINK_PROPERTIES: |
+        jobmanager.rpc.address: flink-jobmanager
+        taskmanager.numberOfTaskSlots: 4
+
+  cdc-event-producer:
+    profiles:
+      - dev-producers
+    build:
+      context: ../../services/event-producers
+      dockerfile: Dockerfile
+    image: etp-event-producers:dev
+    container_name: etp-cdc-event-producer
+    hostname: cdc-event-producer
+    depends_on:
+      kafka:
+        condition: service_healthy
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      PRODUCER_MODE: cdc
+      EVENT_COUNT: ${CDC_EVENT_COUNT:-10000}
+      EVENTS_PER_SECOND: ${CDC_EVENTS_PER_SECOND:-25}
+      TENANT_COUNT: ${CDC_TENANT_COUNT:-5}
+      RUN_CONTINUOUSLY: "true"
+      BATCH_INTERVAL_MS: ${CDC_BATCH_INTERVAL_MS:-2000}
+      TOPIC_WAIT_TIMEOUT_MS: ${CDC_TOPIC_WAIT_TIMEOUT_MS:-120000}
+      TOPIC_WAIT_POLL_INTERVAL_MS: ${CDC_TOPIC_WAIT_POLL_INTERVAL_MS:-2000}
+      STATUS_FILE_PATH: /tmp/cdc-event-producer.status
+      CDC_TARGET_TOPIC: dbz.postgres.mail.public.mail_events
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - test -f /tmp/cdc-event-producer.status && grep -Eq 'ready|running|completed' /tmp/cdc-event-producer.status
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+  # ── Local S3-compatible store for Iceberg ──────────────────────────────────
+
+  minio:
+    profiles:
+      - dev-lakehouse
+    image: minio/minio:latest
+    container_name: etp-minio
+    hostname: minio
+    ports:
+      - "9000:9000"   # S3 API
+      - "9001:9001"   # Console UI (http://localhost:9001  admin/minioadmin)
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    command: server /data --console-address ":9001"
+
+  # One-shot container: creates the lakehouse bucket then exits 0
+  minio-init:
+    profiles:
+      - dev-lakehouse
+    image: minio/mc:latest
+    container_name: etp-minio-init
+    depends_on:
+      minio:
+        condition: service_started
+    entrypoint: >
+      /bin/sh -c "
+        until mc alias set local http://minio:9000 minioadmin minioadmin; do
+          echo 'Waiting for MinIO...'
+          sleep 2
+        done
+        mc mb -p local/event-tracking-lakehouse || true
+        echo 'Bucket event-tracking-lakehouse ready'
+      "
+
+  # ── Canonical lakehouse consumer (Spark Structured Streaming → Iceberg) ───
+
+  canonical-lakehouse-consumer:
+    profiles:
+      - dev-lakehouse
+    build:
+      context: ../../services/canonical-lakehouse-consumer
+      dockerfile: Dockerfile
+    image: etp-canonical-lakehouse-consumer:dev
+    container_name: etp-canonical-lakehouse-consumer
+    hostname: canonical-lakehouse-consumer
+    ports:
+      - "4040:4040"
+    depends_on:
+      kafka:
+        condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully
+    environment:
+      SPARK_MASTER: local[*]
+      SPARK_UI_ENABLED: "true"
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      CANONICAL_KAFKA_TOPIC: ${LAKEHOUSE_KAFKA_TOPIC:-evt.mail.customer.analytics}
+      KAFKA_STARTING_OFFSETS: ${LAKEHOUSE_STARTING_OFFSETS:-earliest}
+      ICEBERG_WAREHOUSE: s3a://event-tracking-lakehouse/warehouse
+      SPARK_CHECKPOINT_LOCATION: ${LAKEHOUSE_CHECKPOINT_LOCATION:-s3a://event-tracking-lakehouse/checkpoints/customer-analytics-v2/tableau-reporting-events}
+      S3_ENDPOINT: http://minio:9000
+      S3_ACCESS_KEY: minioadmin
+      S3_SECRET_KEY: minioadmin
+      S3_PATH_STYLE_ACCESS: "true"
+    healthcheck:
+      test: ["CMD-SHELL", "kill -0 1 2>/dev/null || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
+
+  mail-tracking-event-producer:
+    profiles:
+      - dev-producers
+    image: etp-event-producers:dev
+    build:
+      context: ../../services/event-producers
+      dockerfile: Dockerfile
+    container_name: etp-mail-tracking-event-producer
+    hostname: mail-tracking-event-producer
+    depends_on:
+      kafka:
+        condition: service_healthy
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      PRODUCER_MODE: mail-tracking
+      EVENT_COUNT: ${MAIL_TRACKING_EVENT_COUNT:-10000}
+      EVENTS_PER_SECOND: ${MAIL_TRACKING_EVENTS_PER_SECOND:-25}
+      TENANT_COUNT: ${MAIL_TRACKING_TENANT_COUNT:-5}
+      RUN_CONTINUOUSLY: "true"
+      BATCH_INTERVAL_MS: ${MAIL_TRACKING_BATCH_INTERVAL_MS:-2000}
+      TOPIC_WAIT_TIMEOUT_MS: ${MAIL_TRACKING_TOPIC_WAIT_TIMEOUT_MS:-120000}
+      TOPIC_WAIT_POLL_INTERVAL_MS: ${MAIL_TRACKING_TOPIC_WAIT_POLL_INTERVAL_MS:-2000}
+      STATUS_FILE_PATH: /tmp/mail-tracking-event-producer.status
+      MAIL_TRACKING_TARGET_TOPIC: evt.mail.operational.raw
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - test -f /tmp/mail-tracking-event-producer.status && grep -Eq 'ready|running|completed' /tmp/mail-tracking-event-producer.status
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s

@@ -1,0 +1,89 @@
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: default-container-limits
+  namespace: prod-platform-kafka
+spec:
+  limits:
+  - type: Container
+    default:
+      cpu: "2000m"
+      memory: "4Gi"
+    defaultRequest:
+      cpu: "500m"
+      memory: "1Gi"
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: default-container-limits
+  namespace: prod-platform-flink
+spec:
+  limits:
+  - type: Container
+    default:
+      cpu: "2000m"
+      memory: "4Gi"
+    defaultRequest:
+      cpu: "500m"
+      memory: "1Gi"
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: default-container-limits
+  namespace: prod-data-airflow
+spec:
+  limits:
+  - type: Container
+    default:
+      cpu: "1000m"
+      memory: "2Gi"
+    defaultRequest:
+      cpu: "250m"
+      memory: "512Mi"
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: default-container-limits
+  namespace: prod-app-ingestion-api
+spec:
+  limits:
+  - type: Container
+    default:
+      cpu: "1000m"
+      memory: "2Gi"
+    defaultRequest:
+      cpu: "250m"
+      memory: "512Mi"
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: default-container-limits
+  namespace: prod-app-serving-api
+spec:
+  limits:
+  - type: Container
+    default:
+      cpu: "1000m"
+      memory: "2Gi"
+    defaultRequest:
+      cpu: "250m"
+      memory: "512Mi"
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: default-container-limits
+  namespace: prod-ops-observability
+spec:
+  limits:
+  - type: Container
+    default:
+      cpu: "2000m"
+      memory: "4Gi"
+    defaultRequest:
+      cpu: "500m"
+      memory: "1Gi"

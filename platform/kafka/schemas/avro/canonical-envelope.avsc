@@ -1,0 +1,20 @@
+{
+  "type": "record",
+  "name": "CanonicalEnvelope",
+  "namespace": "com.eventtracking.platform.avro",
+  "doc": "Transport envelope for lifecycle events carried over Kafka.",
+  "fields": [
+    { "name": "event_id", "type": "string" },
+    { "name": "event_type", "type": "string" },
+    { "name": "event_version", "type": "string" },
+    { "name": "event_time", "type": { "type": "long", "logicalType": "timestamp-millis" } },
+    { "name": "ingested_at", "type": { "type": "long", "logicalType": "timestamp-millis" } },
+    { "name": "source_system", "type": "string" },
+    { "name": "tenant_id", "type": ["null", "string"], "default": null },
+    { "name": "message_id", "type": "string" },
+    { "name": "correlation_id", "type": "string" },
+    { "name": "trace_id", "type": ["null", "string"], "default": null },
+    { "name": "actor_type", "type": ["null", "string"], "default": null },
+    { "name": "payload_json", "type": "string" }
+  ]
+}

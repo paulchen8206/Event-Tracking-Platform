@@ -1,0 +1,4 @@
+boto3==1.37.11
+aws-lambda-powertools==3.10.0
+confluent-kafka==2.8.2
+fastavro==1.10.0

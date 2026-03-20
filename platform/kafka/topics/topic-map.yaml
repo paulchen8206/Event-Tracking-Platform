@@ -1,0 +1,168 @@
+topics:
+- name: evt.mail.lifecycle.raw
+  owner: ingestion
+  partitions: 12
+  replication_factor: 1
+  retention: 7d
+  key: message_id
+  value_schema: shared/contracts/events/envelope.schema.json
+  serialization:
+    key_format: string
+    value_format: avro
+    schema_type: AVRO
+    schema_subject: evt.mail.lifecycle.raw-value
+    schema_file: platform/kafka/schemas/avro/canonical-envelope.avsc
+  producers:
+  - services/ingestion-api
+  - platform/kafka/connect
+  consumers:
+  - platform/flink/jobs/mail_lifecycle_router
+  notes: Raw intake of API, CDC, and provider callback events before normalization.
+- name: evt.mail.lifecycle.normalized
+  owner: streaming
+  partitions: 12
+  replication_factor: 1
+  retention: 14d
+  key: message_id
+  value_schema: shared/contracts/events/envelope.schema.json
+  serialization:
+    key_format: string
+    value_format: avro
+    schema_type: AVRO
+    schema_subject: evt.mail.lifecycle.normalized-value
+    schema_file: platform/kafka/schemas/avro/canonical-envelope.avsc
+  producers:
+  - platform/flink/jobs/mail_lifecycle_router
+  consumers:
+  - platform/flink/jobs/mail_lifecycle_router
+  - platform/airflow/dags
+  - services/serving-api
+  notes: Canonicalized lifecycle stream used for downstream projections and replay.
+- name: evt.mail.customer.analytics
+  owner: analytics
+  partitions: 6
+  replication_factor: 1
+  retention: 30d
+  key: tenant_id
+  value_schema: shared/contracts/events/mail.delivered.schema.json
+  serialization:
+    key_format: string
+    value_format: avro
+    schema_type: AVRO
+    schema_subject: evt.mail.customer.analytics-value
+    schema_file: platform/kafka/schemas/avro/customer-analytics-event.avsc
+  producers:
+  - platform/flink/jobs/mail_lifecycle_router
+  consumers:
+  - platform/dbt/models/marts/customer_analytics
+  - services/serving-api
+  notes: Customer-safe event subset for analytical rollups.
+- name: evt.mail.internal.tracking
+  owner: operations
+  partitions: 12
+  replication_factor: 1
+  retention: 30d
+  key: message_id
+  value_schema: shared/contracts/events/envelope.schema.json
+  serialization:
+    key_format: string
+    value_format: avro
+    schema_type: AVRO
+    schema_subject: evt.mail.internal.tracking-value
+    schema_file: platform/kafka/schemas/avro/canonical-envelope.avsc
+  producers:
+  - platform/flink/jobs/mail_lifecycle_router
+  - platform/flink/jobs/operational_mail_tracking_router
+  consumers:
+  - platform/dbt/models/marts/internal_mail_tracking
+  - services/serving-api
+  notes: Operationally rich stream with troubleshooting context preserved for APIs and warehouse marts.
+- name: evt.mail.internal.tracking.dashboard
+  owner: operations
+  partitions: 12
+  replication_factor: 1
+  retention: 7d
+  key: message_id
+  value_schema: shared/contracts/events/mail.operational.status_changed.schema.json
+  serialization:
+    key_format: string
+    value_format: json
+    schema_type: NONE
+    schema_subject: null
+    schema_file: null
+  producers:
+  - platform/flink/jobs/operational_mail_tracking_router
+  consumers:
+  - platform/kafka/connect
+  notes: Dashboard-ready operational stream consumed by Kafka Connect and sunk to Elasticsearch in real time.
+- name: evt.mail.internal.tracking.dashboard.dlq
+  owner: operations
+  partitions: 6
+  replication_factor: 1
+  retention: 14d
+  key: none
+  value_schema: none
+  serialization:
+    key_format: string
+    value_format: json
+    schema_type: NONE
+    schema_subject: null
+    schema_file: null
+  producers:
+  - platform/kafka/connect
+  consumers:
+  - platform/kafka/connect
+  - storage/elasticsearch
+  notes: Dead-letter topic for malformed dashboard records emitted by Kafka Connect sink tasks.
+- name: evt.mail.operational.raw
+  owner: operations
+  partitions: 12
+  replication_factor: 1
+  retention: 14d
+  key: message_id
+  value_schema: shared/contracts/events/mail.operational.status_changed.schema.json
+  serialization:
+    key_format: string
+    value_format: avro
+    schema_type: AVRO
+    schema_subject: evt.mail.operational.raw-value
+    schema_file: platform/kafka/schemas/avro/mail-operational-status-event.avsc
+  producers:
+  - services/dynamodb-mail-tracking-producer
+  consumers:
+  - platform/flink/jobs/operational_mail_tracking_router
+  notes: DynamoDB stream-originated operational mail state events for real-time internal tracking.
+- name: evt.platform.health
+  owner: platform
+  partitions: 3
+  replication_factor: 1
+  retention: 14d
+  key: event_type
+  value_schema: shared/contracts/events/pipeline.job_failed.schema.json
+  serialization:
+    key_format: string
+    value_format: avro
+    schema_type: AVRO
+    schema_subject: evt.platform.health-value
+    schema_file: platform/kafka/schemas/avro/pipeline-job-failed.avsc
+  producers:
+  - platform/flink/jobs/mail_lifecycle_router
+  - platform/airflow/dags
+  consumers:
+  - storage/elasticsearch
+  - platform/dbt/models/marts/internal_mail_tracking
+  notes: Internal pipeline health, lag, and failure signals.
+- name: dbz.postgres.mail.public.mail_events
+  owner: platform
+  partitions: 4
+  replication_factor: 1
+  retention: 7d
+  key: message_id
+  serialization:
+    key_format: string
+    value_format: json
+  producers:
+  - services/event-producers (dev synthetic CDC)
+  consumers:
+  - services/cdc-consumer
+  notes: Debezium PostgreSQL CDC change events for the mail_events table. Created by Debezium in production; bootstrapped manually for local dev.

@@ -1,0 +1,59 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: staging-platform-kafka
+  labels:
+    environment: staging
+    domain: platform
+    workload: kafka
+    pod-security.kubernetes.io/enforce: baseline
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: staging-platform-flink
+  labels:
+    environment: staging
+    domain: platform
+    workload: flink
+    pod-security.kubernetes.io/enforce: baseline
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: staging-data-airflow
+  labels:
+    environment: staging
+    domain: data
+    workload: airflow
+    pod-security.kubernetes.io/enforce: baseline
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: staging-app-ingestion-api
+  labels:
+    environment: staging
+    domain: app
+    workload: ingestion-api
+    pod-security.kubernetes.io/enforce: baseline
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: staging-app-serving-api
+  labels:
+    environment: staging
+    domain: app
+    workload: serving-api
+    pod-security.kubernetes.io/enforce: baseline
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: staging-ops-observability
+  labels:
+    environment: staging
+    domain: ops
+    workload: observability
+    pod-security.kubernetes.io/enforce: baseline

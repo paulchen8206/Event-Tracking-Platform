@@ -1,0 +1,89 @@
+.DS_Store
+
+# Editors and IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.python-version
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+.venv/
+venv/
+env/
+dist/
+build/
+*.egg-info/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Airflow and dbt
+airflow.db
+webserver_config.py
+logs/
+target/
+dbt_packages/
+dbt_modules/
+
+# Java and JVM
+*.class
+*.jar
+*.war
+*.ear
+.gradle/
+out/
+target/
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Terraform
+.terraform/
+.terraform.lock.hcl
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Containers and local tooling
+.docker/
+.cache/
+tmp/
+temp/
+
+# Test and profiling artifacts
+coverage/
+reports/
+*.prof
+
+# OS-generated files
+Thumbs.db

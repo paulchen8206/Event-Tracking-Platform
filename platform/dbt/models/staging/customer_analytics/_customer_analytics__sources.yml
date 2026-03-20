@@ -1,0 +1,85 @@
+version: 2
+sources:
+- name: iceberg_customer_analytics
+  description: Snowflake-accessible external Iceberg tables hydrated by the Spark lakehouse consumer.
+  database: "{{ env_var('DBT_SNOWFLAKE_DATABASE', 'EVENT_TRACKING') }}"
+  schema: "{{ env_var('DBT_SNOWFLAKE_ICEBERG_SCHEMA', 'ICEBERG_CUSTOMER_ANALYTICS') }}"
+  tables:
+  - name: tableau_reporting_events
+    description: Raw landing table from the customer analytics Kafka topic.
+    loaded_at_field: event_ts
+    freshness:
+      warn_after: {count: 2, period: hour}
+      error_after: {count: 6, period: hour}
+    tests:
+    - dbt_utils.unique_combination_of_columns:
+        arguments:
+          combination_of_columns:
+          - event_id
+    columns:
+    - name: event_id
+      tests:
+      - not_null
+    - name: tenant_id
+      tests:
+      - not_null
+      - dbt_utils.not_empty_string
+    - name: event_type
+      tests:
+      - not_null
+      - dbt_utils.not_empty_string
+    - name: event_ts
+      tests:
+      - not_null
+  - name: dim_customer_tenant
+    description: Tenant dimension maintained from the landing Iceberg table.
+    loaded_at_field: last_seen_at
+    freshness:
+      warn_after: {count: 6, period: hour}
+      error_after: {count: 24, period: hour}
+    columns:
+    - name: tenant_id
+      tests:
+      - not_null
+      - unique
+      - dbt_utils.not_empty_string
+  - name: dim_customer_event_type
+    description: Event type dimension maintained from the landing Iceberg table.
+    loaded_at_field: last_seen_at
+    freshness:
+      warn_after: {count: 6, period: hour}
+      error_after: {count: 24, period: hour}
+    columns:
+    - name: event_type
+      tests:
+      - not_null
+      - unique
+      - dbt_utils.not_empty_string
+  - name: fct_tableau_daily_customer_delivery
+    description: Daily delivery and engagement fact table maintained from the landing Iceberg table.
+    loaded_at_field: event_date
+    freshness:
+      warn_after: {count: 1, period: day}
+      error_after: {count: 2, period: day}
+    tests:
+    - dbt_utils.unique_combination_of_columns:
+        arguments:
+          combination_of_columns:
+          - tenant_id
+          - event_date
+    columns:
+    - name: tenant_id
+      tests:
+      - not_null
+    - name: event_date
+      tests:
+      - not_null
+    - name: delivered_count
+      tests:
+      - non_negative
+    - name: opened_count
+      tests:
+      - non_negative
+    - name: clicked_count
+      tests:
+      - non_negative

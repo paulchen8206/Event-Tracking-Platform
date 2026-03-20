@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.internal/contracts/events/mail.requested.schema.json",
+  "title": "Mail Requested Event",
+  "allOf": [
+    {
+      "$ref": "./envelope.schema.json"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_type": {
+          "const": "mail.requested"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["recipient", "channel", "template_id", "requested_by"],
+          "properties": {
+            "recipient": {
+              "type": "string"
+            },
+            "channel": {
+              "type": "string",
+              "enum": ["email", "postal_mail", "sms"]
+            },
+            "template_id": {
+              "type": "string"
+            },
+            "campaign_id": {
+              "type": ["string", "null"]
+            },
+            "requested_by": {
+              "type": "string"
+            },
+            "priority": {
+              "type": "string",
+              "enum": ["low", "normal", "high"]
+            }
+          }
+        }
+      }
+    }
+  ]
+}

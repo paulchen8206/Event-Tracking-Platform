@@ -1,0 +1,24 @@
+global:
+  environment: stg
+  imagePullPolicy: IfNotPresent
+# Staging is similar to production pod topology with moderate sizing.
+ingestionApi:
+  enabled: true
+  replicaCount: 2
+servingApi:
+  enabled: true
+  replicaCount: 2
+kafkaConnect:
+  enabled: true
+  replicaCount: 2
+airflow:
+  enabled: true
+  scheduler:
+    replicaCount: 1
+  webserver:
+    replicaCount: 1
+  worker:
+    replicaCount: 2
+observability:
+  enabled: true
+  replicaCount: 1

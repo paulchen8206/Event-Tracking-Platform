@@ -1,0 +1,18 @@
+version: 2
+models:
+- name: mart_internal_mail_tracking
+  description: Latest known message state and operational context for internal users.
+  columns:
+  - name: message_id
+    description: Stable mail identifier.
+    tests:
+    - not_null
+    - unique
+  - name: latest_event_type
+    description: Most recent lifecycle event for the message.
+    tests:
+    - not_null
+  - name: latest_event_time
+    description: Timestamp of the most recent lifecycle update.
+    tests:
+    - not_null

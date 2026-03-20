@@ -1,0 +1,42 @@
+version: 2
+models:
+- name: dim_tenant
+  description: Conformed tenant dimension shared by customer and internal marts.
+  columns:
+  - name: tenant_id
+    description: Stable tenant identifier.
+    tests:
+    - not_null
+    - unique
+  - name: tenant_name
+    description: Display name for the tenant.
+- name: dim_provider
+  description: Conformed provider dimension for dispatch and delivery analysis.
+  columns:
+  - name: provider_id
+    description: Stable provider identifier.
+    tests:
+    - not_null
+    - unique
+  - name: provider_name
+    description: Human-readable provider name.
+- name: fct_mail_lifecycle
+  description: Canonical lifecycle fact table keyed at the event grain.
+  columns:
+  - name: event_id
+    description: Unique event identifier.
+    tests:
+    - not_null
+    - unique
+  - name: event_type
+    description: Canonical lifecycle event name.
+    tests:
+    - not_null
+  - name: message_id
+    description: Stable mail identifier for lifecycle stitching.
+    tests:
+    - not_null
+  - name: correlation_id
+    description: Correlation identifier spanning workflow steps.
+    tests:
+    - not_null

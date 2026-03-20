@@ -1,0 +1,11 @@
+Event Tracking Platform chart installed.
+
+Release: {{ .Release.Name }}
+Namespace: {{ .Release.Namespace }}
+Environment: {{ .Values.global.environment }}
+
+To inspect resources:
+  kubectl get all -n {{ .Release.Namespace }} -l app.kubernetes.io/instance={{ .Release.Name }}
+
+To render manifests locally:
+  helm template {{ .Release.Name }} {{ .Chart.Name }} -f values.yaml

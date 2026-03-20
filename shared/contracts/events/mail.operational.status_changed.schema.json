@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.internal/contracts/events/mail.operational.status_changed.schema.json",
+  "title": "Mail Operational Status Changed Event",
+  "allOf": [
+    {
+      "$ref": "./envelope.schema.json"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_type": {
+          "const": "mail.operational.status_changed"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "status",
+            "mailbox_id",
+            "processing_stage",
+            "updated_at"
+          ],
+          "properties": {
+            "status": {
+              "type": "string"
+            },
+            "mailbox_id": {
+              "type": "string"
+            },
+            "processing_stage": {
+              "type": "string"
+            },
+            "error_code": {
+              "type": ["string", "null"]
+            },
+            "error_message": {
+              "type": ["string", "null"]
+            },
+            "provider": {
+              "type": ["string", "null"]
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "type": "record",
+  "name": "MailOperationalStatusEvent",
+  "namespace": "com.eventtracking.platform.avro",
+  "doc": "Operational mail tracking event emitted from DynamoDB stream changes.",
+  "fields": [
+    { "name": "event_id", "type": "string" },
+    { "name": "event_type", "type": "string" },
+    { "name": "event_version", "type": "string" },
+    { "name": "event_time", "type": { "type": "long", "logicalType": "timestamp-millis" } },
+    { "name": "ingested_at", "type": { "type": "long", "logicalType": "timestamp-millis" } },
+    { "name": "source_system", "type": "string" },
+    { "name": "tenant_id", "type": ["null", "string"], "default": null },
+    { "name": "message_id", "type": "string" },
+    { "name": "correlation_id", "type": "string" },
+    { "name": "trace_id", "type": ["null", "string"], "default": null },
+    { "name": "actor_type", "type": ["null", "string"], "default": null },
+    { "name": "status", "type": "string" },
+    { "name": "mailbox_id", "type": "string" },
+    { "name": "processing_stage", "type": "string" },
+    { "name": "error_code", "type": ["null", "string"], "default": null },
+    { "name": "error_message", "type": ["null", "string"], "default": null },
+    { "name": "provider", "type": ["null", "string"], "default": null },
+    { "name": "payload_json", "type": "string" }
+  ]
+}

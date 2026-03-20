@@ -1,0 +1,17 @@
+subjects:
+- subject: canonical.events.envelope
+  schema_type: JSON
+  compatibility: BACKWARD
+  schema_file: shared/contracts/events/envelope.schema.json
+- subject: canonical.events.mail.requested
+  schema_type: JSON
+  compatibility: BACKWARD
+  schema_file: shared/contracts/events/mail.requested.schema.json
+- subject: canonical.events.mail.delivered
+  schema_type: JSON
+  compatibility: BACKWARD
+  schema_file: shared/contracts/events/mail.delivered.schema.json
+- subject: canonical.events.pipeline.job_failed
+  schema_type: JSON
+  compatibility: BACKWARD
+  schema_file: shared/contracts/events/pipeline.job_failed.schema.json

@@ -1,0 +1,139 @@
+global:
+  environment: prod
+  imagePullPolicy: IfNotPresent
+# Production uses the same component topology as QA with higher resiliency and scale.
+ingestionApi:
+  enabled: true
+  replicaCount: 3
+  autoscaling:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 65
+  podDisruptionBudget:
+    enabled: true
+    minAvailable: 2
+  ingress:
+    enabled: true
+    className: nginx
+    host: ingestion.prod.local
+    path: /
+    pathType: Prefix
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+    tls:
+      enabled: true
+      secretName: ingestion-prod-tls
+  networkPolicy:
+    enabled: true
+    allowSameNamespace: true
+    allowedNamespaces:
+    - ingress-nginx
+servingApi:
+  enabled: true
+  replicaCount: 3
+  autoscaling:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 65
+  podDisruptionBudget:
+    enabled: true
+    minAvailable: 2
+  ingress:
+    enabled: true
+    className: nginx
+    host: serving.prod.local
+    path: /
+    pathType: Prefix
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+    tls:
+      enabled: true
+      secretName: serving-prod-tls
+  networkPolicy:
+    enabled: true
+    allowSameNamespace: true
+    allowedNamespaces:
+    - ingress-nginx
+kafkaConnect:
+  enabled: true
+  replicaCount: 3
+  autoscaling:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 8
+    targetCPUUtilizationPercentage: 70
+  podDisruptionBudget:
+    enabled: true
+    minAvailable: 2
+  networkPolicy:
+    enabled: true
+    allowSameNamespace: true
+    allowedNamespaces: []
+airflow:
+  enabled: true
+  scheduler:
+    replicaCount: 2
+    podDisruptionBudget:
+      enabled: true
+      minAvailable: 1
+    networkPolicy:
+      enabled: true
+      allowSameNamespace: true
+      allowedNamespaces: []
+  webserver:
+    replicaCount: 2
+    autoscaling:
+      enabled: true
+      minReplicas: 2
+      maxReplicas: 6
+      targetCPUUtilizationPercentage: 70
+    podDisruptionBudget:
+      enabled: true
+      minAvailable: 1
+    ingress:
+      enabled: true
+      className: nginx
+      host: airflow.prod.local
+      path: /
+      pathType: Prefix
+      annotations:
+        cert-manager.io/cluster-issuer: letsencrypt-prod
+      tls:
+        enabled: true
+        secretName: airflow-web-prod-tls
+    networkPolicy:
+      enabled: true
+      allowSameNamespace: true
+      allowedNamespaces:
+      - ingress-nginx
+  worker:
+    replicaCount: 4
+    autoscaling:
+      enabled: true
+      minReplicas: 4
+      maxReplicas: 12
+      targetCPUUtilizationPercentage: 70
+    podDisruptionBudget:
+      enabled: true
+      minAvailable: 2
+    networkPolicy:
+      enabled: true
+      allowSameNamespace: true
+      allowedNamespaces: []
+observability:
+  enabled: true
+  replicaCount: 2
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 6
+    targetCPUUtilizationPercentage: 70
+  podDisruptionBudget:
+    enabled: true
+    minAvailable: 1
+  networkPolicy:
+    enabled: true
+    allowSameNamespace: true
+    allowedNamespaces: []

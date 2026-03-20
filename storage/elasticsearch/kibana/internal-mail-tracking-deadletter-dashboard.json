@@ -1,0 +1,38 @@
+{
+  "title": "Internal Mail Tracking DLQ Dashboard",
+  "description": "Starter Kibana saved object payload for monitoring malformed Kafka Connect records in real time.",
+  "kibana_saved_objects": {
+    "version": "8.x",
+    "exported_objects": [
+      {
+        "type": "index-pattern",
+        "id": "internal-mail-tracking-deadletter-data-view",
+        "attributes": {
+          "title": "internal-mail-tracking-deadletter*",
+          "timeFieldName": "kafka_timestamp"
+        }
+      },
+      {
+        "type": "dashboard",
+        "id": "internal-mail-tracking-deadletter-overview",
+        "attributes": {
+          "title": "Internal Mail Tracking Dead-Letter Overview",
+          "description": "Operational dashboard for malformed records routed through Kafka Connect dead-letter handling.",
+          "filters": [],
+          "kibanaSavedObjectMeta": {
+            "searchSourceJSON": "{\"query\":{\"language\":\"kuery\",\"query\":\"*\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+          },
+          "optionsJSON": "{\"useMargins\":true,\"syncColors\":false,\"syncCursor\":true,\"syncTooltips\":false}",
+          "panelsJSON": "[{\"type\":\"lens\",\"title\":\"DLQ Events Per Minute\",\"description\":\"Date histogram by kafka_timestamp with count metric\",\"gridData\":{\"x\":0,\"y\":0,\"w\":24,\"h\":12},\"embeddableConfig\":{\"attributes\":{\"title\":\"DLQ Events Per Minute\",\"visualizationType\":\"lnsXY\",\"references\":[{\"type\":\"index-pattern\",\"id\":\"internal-mail-tracking-deadletter-data-view\",\"name\":\"indexpattern-datasource-current-indexpattern\"}],\"state\":{\"query\":{\"language\":\"kuery\",\"query\":\"*\"},\"filters\":[],\"datasourceStates\":{\"indexpattern\":{\"layers\":{\"layer1\":{\"columns\":{\"x\":{\"label\":\"kafka_timestamp\",\"dataType\":\"date\",\"operationType\":\"date_histogram\",\"sourceField\":\"kafka_timestamp\",\"isBucketed\":true,\"params\":{\"interval\":\"m\"}},\"y\":{\"label\":\"Count of records\",\"dataType\":\"number\",\"operationType\":\"count\",\"sourceField\":\"Records\",\"isBucketed\":false}},\"columnOrder\":[\"x\",\"y\"],\"incompleteColumns\":{},\"sampling\":1}}},\"visualization\":{\"layers\":[{\"layerId\":\"layer1\",\"xAccessor\":\"x\",\"accessors\":[\"y\"],\"seriesType\":\"line\",\"isHistogram\":true,\"yConfig\":[]}],\"legend\":{\"isVisible\":true,\"position\":\"right\"},\"preferredSeriesType\":\"line\",\"valueLabels\":\"hide\",\"axisTitlesVisibilitySettings\":{\"x\":true,\"yLeft\":true,\"yRight\":true}},\"internalReferences\":[],\"adHocDataViews\":{}}}}},{\"type\":\"lens\",\"title\":\"Top DLQ Partitions\",\"description\":\"Count of malformed records by Kafka partition\",\"gridData\":{\"x\":24,\"y\":0,\"w\":24,\"h\":12},\"embeddableConfig\":{\"attributes\":{\"title\":\"Top DLQ Partitions\",\"visualizationType\":\"lnsDatatable\",\"references\":[{\"type\":\"index-pattern\",\"id\":\"internal-mail-tracking-deadletter-data-view\",\"name\":\"indexpattern-datasource-current-indexpattern\"}],\"state\":{\"query\":{\"language\":\"kuery\",\"query\":\"*\"},\"filters\":[],\"datasourceStates\":{\"indexpattern\":{\"layers\":{\"layer1\":{\"columns\":{\"partition\":{\"label\":\"kafka_partition\",\"dataType\":\"number\",\"operationType\":\"terms\",\"sourceField\":\"kafka_partition\",\"isBucketed\":true,\"params\":{\"size\":5,\"orderBy\":{\"type\":\"column\",\"columnId\":\"count\"},\"orderDirection\":\"desc\"}},\"count\":{\"label\":\"Count of records\",\"dataType\":\"number\",\"operationType\":\"count\",\"sourceField\":\"Records\",\"isBucketed\":false}},\"columnOrder\":[\"partition\",\"count\"],\"incompleteColumns\":{},\"sampling\":1}}},\"visualization\":{\"layerId\":\"layer1\",\"columns\":[{\"columnId\":\"partition\",\"isTransposed\":false},{\"columnId\":\"count\",\"isTransposed\":false}],\"sorting\":{\"columnId\":\"count\",\"direction\":\"desc\"}},\"internalReferences\":[],\"adHocDataViews\":{}}}}}]"
+        },
+        "references": [
+          {
+            "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+            "type": "index-pattern",
+            "id": "internal-mail-tracking-deadletter-data-view"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,26 @@
+spring:
+  main:
+    web-application-type: none
+app:
+  spark-master: ${SPARK_MASTER:local[*]}
+  spark-ui-enabled: ${SPARK_UI_ENABLED:true}
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    topic: ${CANONICAL_KAFKA_TOPIC:evt.mail.customer.analytics}
+    starting-offsets: ${KAFKA_STARTING_OFFSETS:latest}
+  iceberg:
+    catalog-name: ${ICEBERG_CATALOG:lakehouse}
+    namespace: ${ICEBERG_NAMESPACE:customer_analytics}
+    table: ${ICEBERG_TABLE:tableau_reporting_events}
+    warehouse: ${ICEBERG_WAREHOUSE:s3a://event-tracking-lakehouse/warehouse}
+  s3:
+    endpoint: ${S3_ENDPOINT:}
+    access-key: ${S3_ACCESS_KEY:}
+    secret-key: ${S3_SECRET_KEY:}
+    path-style-access: ${S3_PATH_STYLE_ACCESS:true}
+  checkpoint:
+    location: ${SPARK_CHECKPOINT_LOCATION:s3a://event-tracking-lakehouse/checkpoints/customer-analytics/tableau-reporting-events}
+  tableau:
+    tenant-dimension-table: ${TABLEAU_TENANT_DIM_TABLE:dim_customer_tenant}
+    event-type-dimension-table: ${TABLEAU_EVENT_TYPE_DIM_TABLE:dim_customer_event_type}
+    daily-fact-table: ${TABLEAU_DAILY_FACT_TABLE:fct_tableau_daily_customer_delivery}

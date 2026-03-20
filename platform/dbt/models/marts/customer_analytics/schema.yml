@@ -1,0 +1,129 @@
+version: 2
+models:
+- name: mart_customer_delivery_summary
+  description: Snowflake semantic model for Tableau daily customer delivery and engagement reporting.
+  columns:
+  - name: tenant_id
+    description: Tenant identifier.
+    tests:
+    - not_null
+  - name: event_date
+    description: Daily reporting grain.
+    tests:
+    - not_null
+  - name: delivered_count
+    description: Count of delivered messages.
+  - name: open_rate
+    description: Opened over delivered ratio for Tableau consumption.
+    tests:
+    - between_zero_and_one
+  - name: click_through_rate
+    description: Clicked over delivered ratio for Tableau consumption.
+    tests:
+    - between_zero_and_one
+  - name: delivery_success_rate
+    description: Delivered over requested ratio.
+    tests:
+    - between_zero_and_one
+  - name: tenant_lifetime_events
+    description: Lifetime event count used for reporting segmentation.
+    tests:
+    - non_negative
+- name: mart_tableau_customer_tenant
+  description: Tableau-facing tenant dimension curated in Snowflake.
+  columns:
+  - name: tenant_id
+    description: Tenant identifier.
+    tests:
+    - not_null
+    - unique
+- name: mart_tableau_event_type
+  description: Tableau-facing event type dimension curated in Snowflake.
+  columns:
+  - name: event_type
+    description: Customer-safe analytics event type.
+    tests:
+    - not_null
+    - unique
+- name: mart_tableau_campaign_performance
+  description: Tableau-facing campaign performance mart curated in Snowflake.
+  tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - tenant_id
+        - campaign_id
+        - event_date
+  columns:
+  - name: tenant_id
+    description: Tenant identifier.
+    tests:
+    - not_null
+  - name: campaign_id
+    description: Campaign identifier extracted from the analytics event payload.
+    tests:
+    - not_null
+  - name: campaign_name
+    description: Human-readable campaign name for Tableau filters and labels.
+  - name: event_date
+    description: Daily reporting grain for the campaign.
+    tests:
+    - not_null
+  - name: requested_count
+    description: Requested messages for the campaign and day.
+    tests:
+    - non_negative
+  - name: delivered_count
+    description: Delivered messages for the campaign and day.
+    tests:
+    - non_negative
+  - name: open_rate
+    description: Opened over delivered ratio by campaign.
+    tests:
+    - between_zero_and_one
+  - name: click_through_rate
+    description: Clicked over delivered ratio by campaign.
+    tests:
+    - between_zero_and_one
+- name: mart_tableau_template_performance
+  description: Tableau-facing template performance mart curated in Snowflake.
+  tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - tenant_id
+        - template_id
+        - event_date
+  columns:
+  - name: tenant_id
+    description: Tenant identifier.
+    tests:
+    - not_null
+  - name: template_id
+    description: Template identifier extracted from the analytics event payload.
+    tests:
+    - not_null
+  - name: template_name
+    description: Human-readable template name for Tableau filters and labels.
+  - name: template_channel
+    description: Channel associated with the template.
+  - name: event_date
+    description: Daily reporting grain for the template.
+    tests:
+    - not_null
+  - name: requested_count
+    description: Requested messages for the template and day.
+    tests:
+    - non_negative
+  - name: delivered_count
+    description: Delivered messages for the template and day.
+    tests:
+    - non_negative
+  - name: open_rate
+    description: Opened over delivered ratio by template.
+    tests:
+    - between_zero_and_one
+  - name: click_through_rate
+    description: Clicked over delivered ratio by template.
+    tests:
+    - between_zero_and_one

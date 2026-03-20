@@ -1,0 +1,18 @@
+{
+  "description": "Normalize internal mail tracking fields for Kibana dashboards",
+  "processors": [
+    {
+      "set": {
+        "field": "dashboard_source",
+        "value": "internal_mail_tracking"
+      }
+    },
+    {
+      "date": {
+        "field": "dashboard_ts",
+        "formats": ["ISO8601"],
+        "target_field": "@timestamp"
+      }
+    }
+  ]
+}

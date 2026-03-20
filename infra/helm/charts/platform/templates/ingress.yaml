@@ -1,0 +1,71 @@
+{{- $root := . -}}
+{{- range $name := list "ingestionApi" "servingApi" "kafkaConnect" "observability" }}
+{{- $cfg := index $root.Values $name }}
+{{- if and $cfg.enabled $cfg.service.enabled $cfg.ingress.enabled $cfg.ingress.host }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "platform.fullname" $root }}-{{ $name | lower }}
+  labels:
+    {{- include "platform.labels" $root | nindent 4 }}
+    app.kubernetes.io/component: {{ $name | quote }}
+  {{- with $cfg.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  ingressClassName: {{ $cfg.ingress.className }}
+  {{- if $cfg.ingress.tls.enabled }}
+  tls:
+    - hosts:
+        - {{ $cfg.ingress.host }}
+      secretName: {{ $cfg.ingress.tls.secretName }}
+  {{- end }}
+  rules:
+    - host: {{ $cfg.ingress.host }}
+      http:
+        paths:
+          - path: {{ $cfg.ingress.path }}
+            pathType: {{ $cfg.ingress.pathType }}
+            backend:
+              service:
+                name: {{ include "platform.fullname" $root }}-{{ $name | lower }}
+                port:
+                  number: {{ $cfg.service.port }}
+{{- end }}
+{{- end }}
+
+{{- if and .Values.airflow.enabled .Values.airflow.webserver.service.enabled .Values.airflow.webserver.ingress.enabled .Values.airflow.webserver.ingress.host }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "platform.fullname" . }}-airflow-webserver
+  labels:
+    {{- include "platform.labels" . | nindent 4 }}
+    app.kubernetes.io/component: airflow-webserver
+  {{- with .Values.airflow.webserver.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  ingressClassName: {{ .Values.airflow.webserver.ingress.className }}
+  {{- if .Values.airflow.webserver.ingress.tls.enabled }}
+  tls:
+    - hosts:
+        - {{ .Values.airflow.webserver.ingress.host }}
+      secretName: {{ .Values.airflow.webserver.ingress.tls.secretName }}
+  {{- end }}
+  rules:
+    - host: {{ .Values.airflow.webserver.ingress.host }}
+      http:
+        paths:
+          - path: {{ .Values.airflow.webserver.ingress.path }}
+            pathType: {{ .Values.airflow.webserver.ingress.pathType }}
+            backend:
+              service:
+                name: {{ include "platform.fullname" . }}-airflow-webserver
+                port:
+                  number: {{ .Values.airflow.webserver.service.port }}
+{{- end }}

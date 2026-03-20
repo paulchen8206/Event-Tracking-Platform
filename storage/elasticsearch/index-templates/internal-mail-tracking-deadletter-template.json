@@ -1,0 +1,20 @@
+{
+  "index_patterns": ["internal-mail-tracking-deadletter*"],
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 1,
+      "refresh_interval": "5s"
+    },
+    "mappings": {
+      "dynamic": false,
+      "properties": {
+        "raw_payload": { "type": "text" },
+        "kafka_topic": { "type": "keyword" },
+        "kafka_partition": { "type": "integer" },
+        "kafka_offset": { "type": "long" },
+        "kafka_timestamp": { "type": "date", "format": "epoch_millis" }
+      }
+    }
+  }
+}

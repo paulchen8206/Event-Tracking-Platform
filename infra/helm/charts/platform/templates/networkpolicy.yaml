@@ -1,0 +1,70 @@
+{{- $root := . -}}
+{{- range $name := list "ingestionApi" "servingApi" "kafkaConnect" "observability" }}
+{{- $cfg := index $root.Values $name }}
+{{- if and $cfg.enabled $cfg.networkPolicy.enabled }}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "platform.fullname" $root }}-{{ $name | lower }}
+  labels:
+    {{- include "platform.labels" $root | nindent 4 }}
+    app.kubernetes.io/component: {{ $name | quote }}
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/instance: {{ $root.Release.Name }}
+      app.kubernetes.io/component: {{ $name | quote }}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+      {{- if $cfg.networkPolicy.allowSameNamespace }}
+      - podSelector: {}
+      {{- end }}
+      {{- range $ns := $cfg.networkPolicy.allowedNamespaces }}
+      - namespaceSelector:
+          matchLabels:
+            kubernetes.io/metadata.name: {{ $ns | quote }}
+      {{- end }}
+      ports:
+        - protocol: TCP
+          port: {{ $cfg.containerPort }}
+{{- end }}
+{{- end }}
+
+{{- if .Values.airflow.enabled }}
+{{- range $role := list "webserver" "scheduler" "worker" }}
+{{- $cfg := index $.Values.airflow $role }}
+{{- if $cfg.networkPolicy.enabled }}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "platform.fullname" $ }}-airflow-{{ $role }}
+  labels:
+    {{- include "platform.labels" $ | nindent 4 }}
+    app.kubernetes.io/component: {{ printf "airflow-%s" $role | quote }}
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/instance: {{ $.Release.Name }}
+      app.kubernetes.io/component: {{ printf "airflow-%s" $role | quote }}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+      {{- if $cfg.networkPolicy.allowSameNamespace }}
+      - podSelector: {}
+      {{- end }}
+      {{- range $ns := $cfg.networkPolicy.allowedNamespaces }}
+      - namespaceSelector:
+          matchLabels:
+            kubernetes.io/metadata.name: {{ $ns | quote }}
+      {{- end }}
+      ports:
+        - protocol: TCP
+          port: {{ $cfg.containerPort }}
+{{- end }}
+{{- end }}
+{{- end }}

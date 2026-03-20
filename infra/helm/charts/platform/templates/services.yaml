@@ -1,0 +1,45 @@
+{{- $root := . -}}
+{{- range $name := list "ingestionApi" "servingApi" "kafkaConnect" "observability" }}
+{{- $cfg := index $root.Values $name }}
+{{- if and $cfg.enabled $cfg.service.enabled }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "platform.fullname" $root }}-{{ $name | lower }}
+  labels:
+    {{- include "platform.labels" $root | nindent 4 }}
+    app.kubernetes.io/component: {{ $name | quote }}
+spec:
+  type: {{ $cfg.service.type }}
+  selector:
+    app.kubernetes.io/instance: {{ $root.Release.Name }}
+    app.kubernetes.io/component: {{ $name | quote }}
+  ports:
+    - port: {{ $cfg.service.port }}
+      targetPort: {{ $cfg.containerPort }}
+      protocol: TCP
+      name: http
+{{- end }}
+{{- end }}
+
+{{- if and .Values.airflow.enabled .Values.airflow.webserver.service.enabled }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "platform.fullname" . }}-airflow-webserver
+  labels:
+    {{- include "platform.labels" . | nindent 4 }}
+    app.kubernetes.io/component: airflow-webserver
+spec:
+  type: {{ .Values.airflow.webserver.service.type }}
+  selector:
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: airflow-webserver
+  ports:
+    - port: {{ .Values.airflow.webserver.service.port }}
+      targetPort: {{ .Values.airflow.webserver.containerPort }}
+      protocol: TCP
+      name: http
+{{- end }}

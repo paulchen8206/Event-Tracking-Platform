@@ -1,0 +1,59 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dev-platform-kafka
+  labels:
+    environment: dev
+    domain: platform
+    workload: kafka
+    pod-security.kubernetes.io/enforce: baseline
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dev-platform-flink
+  labels:
+    environment: dev
+    domain: platform
+    workload: flink
+    pod-security.kubernetes.io/enforce: baseline
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dev-data-airflow
+  labels:
+    environment: dev
+    domain: data
+    workload: airflow
+    pod-security.kubernetes.io/enforce: baseline
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dev-app-ingestion-api
+  labels:
+    environment: dev
+    domain: app
+    workload: ingestion-api
+    pod-security.kubernetes.io/enforce: baseline
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dev-app-serving-api
+  labels:
+    environment: dev
+    domain: app
+    workload: serving-api
+    pod-security.kubernetes.io/enforce: baseline
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dev-ops-observability
+  labels:
+    environment: dev
+    domain: ops
+    workload: observability
+    pod-security.kubernetes.io/enforce: baseline

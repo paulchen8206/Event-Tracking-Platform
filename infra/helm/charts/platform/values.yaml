@@ -1,0 +1,232 @@
+global:
+  environment: dev
+  imagePullPolicy: IfNotPresent
+nameOverride: ""
+fullnameOverride: ""
+serviceAccount:
+  create: true
+  name: ""
+commonLabels: {}
+commonAnnotations: {}
+ingestionApi:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: ghcr.io/event-tracking/ingestion-api
+    tag: latest
+  containerPort: 8080
+  service:
+    enabled: true
+    type: ClusterIP
+    port: 8080
+  resources: {}
+  env: []
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 75
+  podDisruptionBudget:
+    enabled: false
+    minAvailable: 1
+  ingress:
+    enabled: false
+    className: nginx
+    host: ""
+    path: /
+    pathType: Prefix
+    annotations: {}
+    tls:
+      enabled: false
+      secretName: ""
+  networkPolicy:
+    enabled: false
+    allowSameNamespace: true
+    allowedNamespaces: []
+servingApi:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: ghcr.io/event-tracking/serving-api
+    tag: latest
+  containerPort: 8080
+  service:
+    enabled: true
+    type: ClusterIP
+    port: 8080
+  resources: {}
+  env: []
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 75
+  podDisruptionBudget:
+    enabled: false
+    minAvailable: 1
+  ingress:
+    enabled: false
+    className: nginx
+    host: ""
+    path: /
+    pathType: Prefix
+    annotations: {}
+    tls:
+      enabled: false
+      secretName: ""
+  networkPolicy:
+    enabled: false
+    allowSameNamespace: true
+    allowedNamespaces: []
+kafkaConnect:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: confluentinc/cp-kafka-connect
+    tag: 8.1.2
+  containerPort: 8083
+  service:
+    enabled: true
+    type: ClusterIP
+    port: 8083
+  resources: {}
+  env: []
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 4
+    targetCPUUtilizationPercentage: 75
+  podDisruptionBudget:
+    enabled: false
+    minAvailable: 1
+  ingress:
+    enabled: false
+    className: nginx
+    host: ""
+    path: /
+    pathType: Prefix
+    annotations: {}
+    tls:
+      enabled: false
+      secretName: ""
+  networkPolicy:
+    enabled: false
+    allowSameNamespace: true
+    allowedNamespaces: []
+observability:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: ghcr.io/event-tracking/observability
+    tag: latest
+  containerPort: 9090
+  service:
+    enabled: false
+    type: ClusterIP
+    port: 9090
+  resources: {}
+  env: []
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 75
+  podDisruptionBudget:
+    enabled: false
+    minAvailable: 1
+  ingress:
+    enabled: false
+    className: nginx
+    host: ""
+    path: /
+    pathType: Prefix
+    annotations: {}
+    tls:
+      enabled: false
+      secretName: ""
+  networkPolicy:
+    enabled: false
+    allowSameNamespace: true
+    allowedNamespaces: []
+airflow:
+  enabled: true
+  image:
+    repository: apache/airflow
+    tag: 2.9.2
+  webserver:
+    replicaCount: 1
+    command:
+    - bash
+    - -c
+    - airflow webserver
+    containerPort: 8080
+    service:
+      enabled: true
+      type: ClusterIP
+      port: 8080
+    resources: {}
+    env: []
+    autoscaling:
+      enabled: false
+      minReplicas: 1
+      maxReplicas: 3
+      targetCPUUtilizationPercentage: 75
+    podDisruptionBudget:
+      enabled: false
+      minAvailable: 1
+    ingress:
+      enabled: false
+      className: nginx
+      host: ""
+      path: /
+      pathType: Prefix
+      annotations: {}
+      tls:
+        enabled: false
+        secretName: ""
+    networkPolicy:
+      enabled: false
+      allowSameNamespace: true
+      allowedNamespaces: []
+  scheduler:
+    replicaCount: 1
+    command:
+    - bash
+    - -c
+    - airflow scheduler
+    containerPort: 8793
+    resources: {}
+    env: []
+    autoscaling:
+      enabled: false
+      minReplicas: 1
+      maxReplicas: 2
+      targetCPUUtilizationPercentage: 75
+    podDisruptionBudget:
+      enabled: false
+      minAvailable: 1
+    networkPolicy:
+      enabled: false
+      allowSameNamespace: true
+      allowedNamespaces: []
+  worker:
+    replicaCount: 1
+    command:
+    - bash
+    - -c
+    - airflow celery worker
+    containerPort: 8793
+    resources: {}
+    env: []
+    autoscaling:
+      enabled: false
+      minReplicas: 1
+      maxReplicas: 6
+      targetCPUUtilizationPercentage: 75
+    podDisruptionBudget:
+      enabled: false
+      minAvailable: 1
+    networkPolicy:
+      enabled: false
+      allowSameNamespace: true
+      allowedNamespaces: []

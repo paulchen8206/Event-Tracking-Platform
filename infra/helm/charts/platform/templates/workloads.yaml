@@ -1,0 +1,96 @@
+{{- $root := . -}}
+{{- range $name := list "ingestionApi" "servingApi" "kafkaConnect" "observability" }}
+{{- $cfg := index $root.Values $name }}
+{{- if $cfg.enabled }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "platform.fullname" $root }}-{{ $name | lower }}
+  labels:
+    {{- include "platform.labels" $root | nindent 4 }}
+    app.kubernetes.io/component: {{ $name | quote }}
+spec:
+  replicas: {{ default 1 $cfg.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: {{ $root.Release.Name }}
+      app.kubernetes.io/component: {{ $name | quote }}
+  template:
+    metadata:
+      labels:
+        {{- include "platform.labels" $root | nindent 8 }}
+        app.kubernetes.io/component: {{ $name | quote }}
+      {{- with $root.Values.commonAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      serviceAccountName: {{ include "platform.serviceAccountName" $root }}
+      containers:
+        - name: {{ $name | lower }}
+          image: "{{ $cfg.image.repository }}:{{ $cfg.image.tag }}"
+          imagePullPolicy: {{ $root.Values.global.imagePullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ $cfg.containerPort }}
+              protocol: TCP
+          {{- with $cfg.env }}
+          env:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with $cfg.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+{{- end }}
+{{- end }}
+
+{{- if .Values.airflow.enabled }}
+{{- range $role := list "webserver" "scheduler" "worker" }}
+{{- $cfg := index $.Values.airflow $role }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "platform.fullname" $ }}-airflow-{{ $role }}
+  labels:
+    {{- include "platform.labels" $ | nindent 4 }}
+    app.kubernetes.io/component: {{ printf "airflow-%s" $role | quote }}
+spec:
+  replicas: {{ default 1 $cfg.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: {{ $.Release.Name }}
+      app.kubernetes.io/component: {{ printf "airflow-%s" $role | quote }}
+  template:
+    metadata:
+      labels:
+        {{- include "platform.labels" $ | nindent 8 }}
+        app.kubernetes.io/component: {{ printf "airflow-%s" $role | quote }}
+      {{- with $.Values.commonAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      serviceAccountName: {{ include "platform.serviceAccountName" $ }}
+      containers:
+        - name: airflow-{{ $role }}
+          image: "{{ $.Values.airflow.image.repository }}:{{ $.Values.airflow.image.tag }}"
+          imagePullPolicy: {{ $.Values.global.imagePullPolicy }}
+          command:
+            {{- toYaml $cfg.command | nindent 12 }}
+          ports:
+            - name: http
+              containerPort: {{ $cfg.containerPort }}
+              protocol: TCP
+          {{- with $cfg.env }}
+          env:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with $cfg.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+{{- end }}
+{{- end }}

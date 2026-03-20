@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.internal/contracts/events/pipeline.job_failed.schema.json",
+  "title": "Pipeline Job Failed Event",
+  "allOf": [
+    {
+      "$ref": "./envelope.schema.json"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_type": {
+          "const": "pipeline.job_failed"
+        },
+        "tenant_id": {
+          "type": ["string", "null"]
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["job_name", "job_type", "failure_reason", "failed_at"],
+          "properties": {
+            "job_name": {
+              "type": "string"
+            },
+            "job_type": {
+              "type": "string",
+              "enum": ["flink", "airflow", "dbt", "connector"]
+            },
+            "failure_reason": {
+              "type": "string"
+            },
+            "failed_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "recoverable": {
+              "type": "boolean"
+            }
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "type": "record",
+  "name": "CustomerAnalyticsEvent",
+  "namespace": "com.eventtracking.platform.avro",
+  "doc": "Customer-safe analytics event projection.",
+  "fields": [
+    { "name": "tenant_id", "type": "string" },
+    { "name": "message_id", "type": "string" },
+    { "name": "event_type", "type": "string" },
+    { "name": "event_time", "type": { "type": "long", "logicalType": "timestamp-millis" } },
+    { "name": "campaign_id", "type": ["null", "string"], "default": null },
+    { "name": "template_id", "type": ["null", "string"], "default": null },
+    { "name": "provider", "type": ["null", "string"], "default": null },
+    { "name": "status", "type": ["null", "string"], "default": null },
+    { "name": "metrics_json", "type": ["null", "string"], "default": null }
+  ]
+}

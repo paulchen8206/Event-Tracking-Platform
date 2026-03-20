@@ -1,0 +1,36 @@
+event_tracking_platform:
+  target: dev
+  outputs:
+    dev:
+      type: snowflake
+      account: "{{ env_var('DBT_SNOWFLAKE_ACCOUNT') }}"
+      user: "{{ env_var('DBT_SNOWFLAKE_USER') }}"
+      password: "{{ env_var('DBT_SNOWFLAKE_PASSWORD') }}"
+      role: "{{ env_var('DBT_SNOWFLAKE_ROLE', 'TRANSFORMER') }}"
+      warehouse: "{{ env_var('DBT_SNOWFLAKE_WAREHOUSE', 'ANALYTICS_DEV_WH') }}"
+      database: "{{ env_var('DBT_SNOWFLAKE_DATABASE', 'EVENT_TRACKING') }}"
+      schema: "{{ env_var('DBT_SNOWFLAKE_TARGET_SCHEMA', 'ANALYTICS_SEMANTIC_DEV') }}"
+      threads: 4
+      client_session_keep_alive: false
+    staging:
+      type: snowflake
+      account: "{{ env_var('DBT_SNOWFLAKE_ACCOUNT') }}"
+      user: "{{ env_var('DBT_SNOWFLAKE_USER') }}"
+      password: "{{ env_var('DBT_SNOWFLAKE_PASSWORD') }}"
+      role: "{{ env_var('DBT_SNOWFLAKE_ROLE', 'TRANSFORMER') }}"
+      warehouse: "{{ env_var('DBT_SNOWFLAKE_WAREHOUSE', 'ANALYTICS_STAGING_WH') }}"
+      database: "{{ env_var('DBT_SNOWFLAKE_DATABASE', 'EVENT_TRACKING') }}"
+      schema: "{{ env_var('DBT_SNOWFLAKE_TARGET_SCHEMA', 'ANALYTICS_SEMANTIC_STAGING') }}"
+      threads: 8
+      client_session_keep_alive: false
+    prod:
+      type: snowflake
+      account: "{{ env_var('DBT_SNOWFLAKE_ACCOUNT') }}"
+      user: "{{ env_var('DBT_SNOWFLAKE_USER') }}"
+      password: "{{ env_var('DBT_SNOWFLAKE_PASSWORD') }}"
+      role: "{{ env_var('DBT_SNOWFLAKE_ROLE', 'TRANSFORMER') }}"
+      warehouse: "{{ env_var('DBT_SNOWFLAKE_WAREHOUSE', 'ANALYTICS_PROD_WH') }}"
+      database: "{{ env_var('DBT_SNOWFLAKE_DATABASE', 'EVENT_TRACKING') }}"
+      schema: "{{ env_var('DBT_SNOWFLAKE_TARGET_SCHEMA', 'ANALYTICS_SEMANTIC') }}"
+      threads: 8
+      client_session_keep_alive: false

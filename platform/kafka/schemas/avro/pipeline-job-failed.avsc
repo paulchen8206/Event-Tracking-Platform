@@ -1,0 +1,21 @@
+{
+  "type": "record",
+  "name": "PipelineJobFailed",
+  "namespace": "com.eventtracking.platform.avro",
+  "doc": "Platform health event emitted when a pipeline component fails.",
+  "fields": [
+    { "name": "event_id", "type": "string" },
+    { "name": "event_type", "type": "string" },
+    { "name": "event_version", "type": "string" },
+    { "name": "event_time", "type": { "type": "long", "logicalType": "timestamp-millis" } },
+    { "name": "ingested_at", "type": { "type": "long", "logicalType": "timestamp-millis" } },
+    { "name": "source_system", "type": "string" },
+    { "name": "message_id", "type": "string" },
+    { "name": "correlation_id", "type": "string" },
+    { "name": "job_name", "type": "string" },
+    { "name": "job_type", "type": "string" },
+    { "name": "failure_reason", "type": "string" },
+    { "name": "failed_at", "type": { "type": "long", "logicalType": "timestamp-millis" } },
+    { "name": "recoverable", "type": "boolean" }
+  ]
+}

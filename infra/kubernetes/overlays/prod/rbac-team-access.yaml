@@ -1,0 +1,83 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: prod-platform-kafka-admins
+  namespace: prod-platform-kafka
+subjects:
+- kind: Group
+  name: etp-prod-platform-admins
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: ClusterRole
+  name: platform-app-writer
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: prod-platform-flink-admins
+  namespace: prod-platform-flink
+subjects:
+- kind: Group
+  name: etp-prod-platform-admins
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: ClusterRole
+  name: platform-app-writer
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: prod-data-team-writers
+  namespace: prod-data-airflow
+subjects:
+- kind: Group
+  name: etp-prod-data-engineers
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: ClusterRole
+  name: platform-app-writer
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: prod-app-team-writers-ingestion
+  namespace: prod-app-ingestion-api
+subjects:
+- kind: Group
+  name: etp-prod-app-engineers
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: ClusterRole
+  name: platform-app-writer
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: prod-app-team-writers-serving
+  namespace: prod-app-serving-api
+subjects:
+- kind: Group
+  name: etp-prod-app-engineers
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: ClusterRole
+  name: platform-app-writer
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: prod-observability-readonly
+  namespace: prod-ops-observability
+subjects:
+- kind: Group
+  name: etp-prod-observers
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: ClusterRole
+  name: platform-readonly
+  apiGroup: rbac.authorization.k8s.io

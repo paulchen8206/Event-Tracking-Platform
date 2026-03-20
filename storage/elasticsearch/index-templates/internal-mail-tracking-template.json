@@ -1,0 +1,30 @@
+{
+  "index_patterns": ["internal-mail-tracking*"],
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 1,
+      "refresh_interval": "5s"
+    },
+    "mappings": {
+      "dynamic": false,
+      "properties": {
+        "event_id": { "type": "keyword" },
+        "event_type": { "type": "keyword" },
+        "event_version": { "type": "keyword" },
+        "source_system": { "type": "keyword" },
+        "tenant_id": { "type": "keyword" },
+        "message_id": { "type": "keyword" },
+        "correlation_id": { "type": "keyword" },
+        "status": { "type": "keyword" },
+        "mailbox_id": { "type": "keyword" },
+        "processing_stage": { "type": "keyword" },
+        "provider": { "type": "keyword" },
+        "error_code": { "type": "keyword" },
+        "error_message": { "type": "text" },
+        "event_time": { "type": "date", "format": "epoch_millis" },
+        "dashboard_ts": { "type": "date" }
+      }
+    }
+  }
+}
