@@ -6,6 +6,7 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 CONNECT_URL="${CONNECT_URL:-http://localhost:8083}"
 ELASTICSEARCH_URL="${ELASTICSEARCH_URL:-http://localhost:9200}"
 KAFKA_CONTAINER="${KAFKA_CONTAINER:-etp-kafka}"
+KAFKA_BOOTSTRAP_SERVERS="${KAFKA_BOOTSTRAP_SERVERS:-kafka:29092}"
 SOURCE_TOPIC="${SOURCE_TOPIC:-evt.mail.internal.tracking.dashboard}"
 DLQ_INDEX="${DLQ_INDEX:-internal-mail-tracking-deadletter}"
 PRIMARY_CONNECTOR_NAME="${PRIMARY_CONNECTOR_NAME:-internal-mail-tracking-elasticsearch-sink}"
@@ -54,18 +55,57 @@ register_connector() {
     "${CONNECT_URL}/connectors/${connector_name}/config" \
     -H 'Content-Type: application/json' \
     --data @"$config_file" >/dev/null
+
+  curl -fsS -X POST \
+    "${CONNECT_URL}/connectors/${connector_name}/restart?includeTasks=true&onlyFailed=false" >/dev/null
+}
+
+ensure_dlq_index() {
+  local recreate_index=false
+
+  if curl -fsS "${ELASTICSEARCH_URL}/${DLQ_INDEX}" >/dev/null 2>&1; then
+    local settings
+    local mapping
+    settings="$(curl -fsS "${ELASTICSEARCH_URL}/${DLQ_INDEX}/_settings")"
+    mapping="$(curl -fsS "${ELASTICSEARCH_URL}/${DLQ_INDEX}/_mapping")"
+
+    if [[ "$settings" == *'"default_pipeline":"internal-mail-tracking-pipeline"'* ]] || [[ "$mapping" != *'"raw_payload"'* ]]; then
+      recreate_index=true
+    fi
+  fi
+
+  if [[ "$recreate_index" == true ]]; then
+    echo "Recreating stale dead-letter index: ${DLQ_INDEX}"
+    curl -fsS -X DELETE "${ELASTICSEARCH_URL}/${DLQ_INDEX}" >/dev/null
+  fi
+
+  if ! curl -fsS "${ELASTICSEARCH_URL}/${DLQ_INDEX}" >/dev/null 2>&1; then
+    echo "Creating dead-letter index: ${DLQ_INDEX}"
+    curl -fsS -X PUT "${ELASTICSEARCH_URL}/${DLQ_INDEX}" >/dev/null
+  fi
 }
 
 assert_connector_running() {
   local connector_name="$1"
-  local state
+  local elapsed=0
 
-  state="$(curl -fsS "${CONNECT_URL}/connectors/${connector_name}/status" | sed -n 's/.*"state":"\([A-Z]*\)".*/\1/p' | head -n1)"
-  if [[ "$state" != "RUNNING" ]]; then
-    echo "Connector is not RUNNING: $connector_name (state=$state)" >&2
-    exit 1
-  fi
-  echo "Connector RUNNING: $connector_name"
+  while true; do
+    local state
+    state="$(curl -fsS "${CONNECT_URL}/connectors/${connector_name}/status" | sed -n 's/.*"state":"\([A-Z]*\)".*/\1/p' | head -n1)"
+
+    if [[ "$state" == "RUNNING" ]]; then
+      echo "Connector RUNNING: $connector_name"
+      return 0
+    fi
+
+    if [[ "$elapsed" -ge "$CONNECT_TIMEOUT_SECONDS" ]]; then
+      echo "Connector is not RUNNING: $connector_name (state=$state)" >&2
+      exit 1
+    fi
+
+    sleep "$SLEEP_SECONDS"
+    elapsed=$((elapsed + SLEEP_SECONDS))
+  done
 }
 
 publish_malformed_record() {
@@ -74,7 +114,7 @@ publish_malformed_record() {
 
   echo "Publishing malformed record to ${SOURCE_TOPIC}: ${payload}"
   docker exec -i "$KAFKA_CONTAINER" kafka-console-producer \
-    --bootstrap-server localhost:29092 \
+    --bootstrap-server "$KAFKA_BOOTSTRAP_SERVERS" \
     --topic "$SOURCE_TOPIC" >/dev/null <<<"$payload"
 }
 
@@ -123,6 +163,8 @@ main() {
     "${ELASTICSEARCH_URL}/_index_template/internal-mail-tracking-deadletter-template" \
     -H 'Content-Type: application/json' \
     --data @"$DLQ_TEMPLATE_FILE" >/dev/null
+
+  ensure_dlq_index
 
   register_connector "$PRIMARY_CONNECTOR_NAME" "$PRIMARY_CONNECTOR_CONFIG"
   register_connector "$DLQ_CONNECTOR_NAME" "$DLQ_CONNECTOR_CONFIG"

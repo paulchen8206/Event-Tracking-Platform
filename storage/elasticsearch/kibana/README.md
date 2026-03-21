@@ -31,16 +31,26 @@ The dashboard JSON is a starter payload containing:
 
 ## Import Notes
 
-Use `make dev-kibana-import` to import both dashboards in one command, or import individually with the Saved Objects API:
+Use `make dev-kibana-import` to import both dashboards in one command. The Make target converts repository JSON assets into Kibana-compatible NDJSON before upload.
+
+For manual import with the Saved Objects API, first convert JSON to NDJSON:
 
 ```bash
-curl -sS -X POST "http://localhost:5601/api/saved_objects/_import?overwrite=true" \
-  -H "kbn-xsrf: true" \
-  -F file=@storage/elasticsearch/kibana/internal-mail-tracking-operational-dashboard.json
+python3 scripts/dev/kibana_saved_objects_json_to_ndjson.py \
+  --input storage/elasticsearch/kibana/internal-mail-tracking-operational-dashboard.json \
+  --output /tmp/internal-mail-tracking-operational-dashboard.ndjson
+
+python3 scripts/dev/kibana_saved_objects_json_to_ndjson.py \
+  --input storage/elasticsearch/kibana/internal-mail-tracking-deadletter-dashboard.json \
+  --output /tmp/internal-mail-tracking-deadletter-dashboard.ndjson
 
 curl -sS -X POST "http://localhost:5601/api/saved_objects/_import?overwrite=true" \
   -H "kbn-xsrf: true" \
-  -F file=@storage/elasticsearch/kibana/internal-mail-tracking-deadletter-dashboard.json
+  -F file=@/tmp/internal-mail-tracking-operational-dashboard.ndjson
+
+curl -sS -X POST "http://localhost:5601/api/saved_objects/_import?overwrite=true" \
+  -H "kbn-xsrf: true" \
+  -F file=@/tmp/internal-mail-tracking-deadletter-dashboard.ndjson
 ```
 
 Kibana version note: these assets target Kibana 8.x saved object format. Adjust `migrationVersion` fields if deploying against a different major version.

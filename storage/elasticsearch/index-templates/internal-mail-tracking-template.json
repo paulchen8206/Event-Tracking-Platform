@@ -1,5 +1,6 @@
 {
-  "index_patterns": ["internal-mail-tracking*"],
+  "index_patterns": ["internal-mail-tracking"],
+  "priority": 100,
   "template": {
     "settings": {
       "number_of_shards": 1,

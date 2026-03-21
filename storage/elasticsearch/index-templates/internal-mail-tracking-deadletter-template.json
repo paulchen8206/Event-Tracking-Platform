@@ -1,5 +1,6 @@
 {
-  "index_patterns": ["internal-mail-tracking-deadletter*"],
+  "index_patterns": ["internal-mail-tracking-deadletter"],
+  "priority": 200,
   "template": {
     "settings": {
       "number_of_shards": 1,
