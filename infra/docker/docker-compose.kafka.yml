@@ -400,6 +400,10 @@ services:
       DBT_PROJECT_DIR: /opt/airflow/platform/dbt
       DBT_PROFILES_DIR: /opt/airflow/platform/dbt
       DBT_TARGET: ${DBT_TARGET:-dev}
+      # Local dev stubs: canonical streaming runs as a separate long-lived service
+      # in the dev-lakehouse profile; operational projection has no dedicated service yet.
+      SPARK_APP_CANONICAL_COMMAND: ${SPARK_APP_CANONICAL_COMMAND:-echo canonical-lakehouse-refresh-stub}
+      SPARK_APP_OPS_COMMAND: ${SPARK_APP_OPS_COMMAND:-echo operational-mail-tracking-projection-stub}
     healthcheck:
       test:
         - CMD-SHELL
