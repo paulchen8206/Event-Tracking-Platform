@@ -1,4 +1,4 @@
-# System Architecture
+# Event Tracking Platform System Architecture
 
 ## Purpose
 
@@ -14,49 +14,41 @@ This document captures the current target architecture for the Event Tracking Pl
 ## Logical Architecture
 
 ```mermaid
-flowchart LR
-    subgraph Sources
+flowchart TB
+    subgraph SourceDomain[Source Domain]
         DDB[(DynamoDB Streams)]
         PSQL[(PostgreSQL CDC)]
         APIIN[Ingestion API]
     end
 
-    subgraph Event Backbone
+    subgraph TransportDomain[Transport Domain]
         KRAW[(evt.mail.operational.raw)]
         KCAN[(evt.mail.customer.analytics)]
-        KNORM[(evt.mail.internal.tracking)]
+        KINT[(evt.mail.internal.tracking)]
         KDASH[(evt.mail.internal.tracking.dashboard)]
         KDLQ[(evt.mail.internal.tracking.dashboard.dlq)]
     end
 
-    subgraph Stream Processing
+    subgraph StreamDomain[Stream Domain]
         FLINK[Operational Flink Router]
     end
 
-    subgraph Lakehouse Processing
+    subgraph AnalyticsDomain[Analytics Domain]
         SPARK[Canonical Lakehouse Consumer]
         S3ICE[(S3 + Iceberg)]
+        SNOWICE[(Snowflake ICEBERG_CUSTOMER_ANALYTICS)]
+        DBT[dbt Semantic Layer]
+        SNOWMART[(Snowflake ANALYTICS_SEMANTIC)]
     end
 
-    subgraph Sink Integration
+    subgraph OpsServingDomain[Operational Serving Domain]
         KCMAIN[Kafka Connect ES Sink]
         KCDLQ[Kafka Connect DLQ Sink]
-    end
-
-    subgraph Serving Stores
         ESMAIN[(internal-mail-tracking)]
         ESDLQ[(internal-mail-tracking-deadletter)]
-        SNOWICE[(Snowflake
-ICEBERG_CUSTOMER_ANALYTICS)]
-        SNOWMART[(Snowflake
-ANALYTICS_SEMANTIC_DEV)]
     end
 
-    subgraph Transformation
-        DBT[dbt Semantic Layer]
-    end
-
-    subgraph Consumers
+    subgraph ConsumptionDomain[Consumption Domain]
         KIBANA[Kibana Operational Dashboards]
         TABLEAU[Tableau Customer Analytics]
         SAPI[Serving API]
@@ -67,21 +59,23 @@ ANALYTICS_SEMANTIC_DEV)]
     APIIN --> KRAW
     KRAW --> FLINK
     FLINK --> KCAN
-    FLINK --> KNORM
+    FLINK --> KINT
     FLINK --> KDASH
+
     KDASH --> KCMAIN
     KCMAIN --> ESMAIN
     KCMAIN -- malformed --> KDLQ
     KDLQ --> KCDLQ
     KCDLQ --> ESDLQ
-    ESMAIN --> KIBANA
-    ESDLQ --> KIBANA
 
     KCAN --> SPARK
     SPARK --> S3ICE
     S3ICE --> SNOWICE
     SNOWICE --> DBT
     DBT --> SNOWMART
+
+    ESMAIN --> KIBANA
+    ESDLQ --> KIBANA
     SNOWMART --> TABLEAU
     SNOWMART --> SAPI
     ESMAIN --> SAPI
@@ -118,24 +112,26 @@ ANALYTICS_SEMANTIC_DEV)]
 - ADR 0001: Kubernetes as the base runtime platform
 - ADR 0002: Environment-first namespace strategy and guardrails
 - ADR 0003: Hybrid managed/self-hosted operating model
-- ADR 0004: Flink to Kafka Connect sink decoupling for Elasticsearch
-- ADR 0005: Dead-letter strategy for malformed operational events
-- ADR 0006: Minikube on Docker for local Kubernetes development
+- ADR 0005: Flink to Kafka Connect sink decoupling for Elasticsearch
+- ADR 0006: Dead-letter strategy for malformed operational events
+- ADR 0007: Minikube on Docker for local Kubernetes development
 
 ## Deployment Topology
 
 - Deployment and environment-specific topology are maintained in dedicated deployment documents to avoid drift between architecture pages.
-- Refer to deployment-architecture.md for environment model and deployment workflows.
-- Refer to deployment-runtime-topology.md for namespace placement, runtime boundaries, and promotion flow.
+- Refer to [deployment-architecture.md](deployment-architecture.md) for environment model and deployment workflows.
+- Refer to [deployment-runtime-topology.md](deployment-runtime-topology.md) for namespace placement, runtime boundaries, and promotion flow.
 
 ## Operability and Validation
 
 - Smoke test script validates connector registration, malformed publish path, and dead-letter indexing
 - Topic and schema metadata maintained as source-controlled assets
-- ADR index in docs tracks architectural evolution over time
+- ADR index in [../adr/README.md](../adr/README.md) tracks architectural evolution over time
 
 ## Related Architecture Docs
 
-- `docs/architecture/deployment-architecture.md`
-- `docs/architecture/deployment-runtime-topology.md`
-- `docs/architecture/spring-boot-framework-and-patterns.md`
+- [deployment-architecture.md](deployment-architecture.md)
+- [deployment-runtime-topology.md](deployment-runtime-topology.md)
+- [spring-boot-framework-and-patterns.md](spring-boot-framework-and-patterns.md)
+- [aws-well-architected-improvement-plan.md](aws-well-architected-improvement-plan.md)
+- [../diagrams/airflow-dag-orchestration.md](../diagrams/airflow-dag-orchestration.md)

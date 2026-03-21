@@ -1,4 +1,4 @@
-# Event Taxonomy
+# Event Tracking Platform Event Taxonomy
 
 ## Purpose
 
@@ -158,10 +158,15 @@ Not every message will traverse every stage. The warehouse and operational servi
 
 ## Repository Mapping
 
-- `shared/contracts/events/`: schema contracts for event envelopes and event families
-- `platform/kafka/topics/`: topic definitions by lifecycle or domain boundary
-- `platform/flink/jobs/`: normalization, enrichment, correlation, and routing logic
-- `platform/dbt/models/marts/shared/`: shared conformed dimensions and lifecycle facts
-- `platform/dbt/models/marts/customer_analytics/`: externally oriented metrics and reporting marts
-- `platform/dbt/models/marts/internal_mail_tracking/`: operational audit, SLA, and workflow monitoring marts
-- `storage/elasticsearch/`: searchable operational projections for support and investigation use cases
+- [../../shared/contracts/events/](../../shared/contracts/events/): schema contracts for event envelopes and event families
+- [../../platform/kafka/topics/](../../platform/kafka/topics/): topic definitions by lifecycle or domain boundary
+- [../../platform/flink/jobs/](../../platform/flink/jobs/): normalization, enrichment, correlation, and routing logic
+- [../../platform/dbt/models/marts/shared/](../../platform/dbt/models/marts/shared/): shared conformed dimensions and lifecycle facts
+- [../../platform/dbt/models/marts/customer_analytics/](../../platform/dbt/models/marts/customer_analytics/): externally oriented metrics and reporting marts
+- [../../platform/dbt/models/marts/internal_mail_tracking/](../../platform/dbt/models/marts/internal_mail_tracking/): operational audit, SLA, and workflow monitoring marts
+- [../../storage/elasticsearch/](../../storage/elasticsearch/): searchable operational projections for support and investigation use cases
+
+## Related documents
+
+- [use-cases.md](use-cases.md)
+- [../architecture/system-architecture.md](../architecture/system-architecture.md)

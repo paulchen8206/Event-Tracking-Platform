@@ -1,4 +1,4 @@
-# ADR 0006: Standardize Local Kubernetes Development on Minikube Docker
+# ADR 0007: Standardize Local Kubernetes Development on Minikube Docker
 
 - Status: Accepted
 - Date: 2026-03-19

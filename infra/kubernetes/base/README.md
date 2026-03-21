@@ -1,4 +1,4 @@
-# Kubernetes Base
+# Kubernetes Base Manifests
 
 This directory contains cluster-level baseline manifests shared across environments.
 

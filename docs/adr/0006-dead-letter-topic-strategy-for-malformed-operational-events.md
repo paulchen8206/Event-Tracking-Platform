@@ -1,4 +1,4 @@
-# ADR 0005: Dead-Letter Topic Strategy for Malformed Operational Events
+# ADR 0006: Dead-Letter Topic Strategy for Malformed Operational Events
 
 - Status: Accepted
 - Date: 2026-03-19
@@ -7,7 +7,7 @@
 
 ## Context
 
-After decoupling sink delivery via Kafka Connect (ADR 0004), malformed records can still fail indexing. Logging-only error handling is insufficient for incident response and forensic analysis because problematic records are not retained as first-class data artifacts.
+After decoupling sink delivery via Kafka Connect (ADR 0005), malformed records can still fail indexing. Logging-only error handling is insufficient for incident response and forensic analysis because problematic records are not retained as first-class data artifacts.
 
 The platform needs:
 
@@ -36,7 +36,7 @@ Dead-letter records preserve:
 ### 3. Operations and observability
 
 - Retain dead-letter topic for short-to-medium investigation window (14d default)
-- Provide Kibana starter assets for dead-letter monitoring
+- Provide Kibana dashboard assets for dead-letter monitoring
 - Include smoke test coverage for malformed-record routing and index verification
 
 ## Consequences

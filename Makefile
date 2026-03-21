@@ -26,7 +26,7 @@ COMPOSE_FILE := infra/docker/docker-compose.kafka.yml
 DC := docker compose -f $(COMPOSE_FILE)
 DBT_SERVICE := dbt-snowflake
 DBT_TARGET ?= dev
-STACK_PROFILES := --profile dev-producers --profile dev-lakehouse --profile dev-dbt --profile dev-flink-ui
+STACK_PROFILES := --profile dev-producers --profile dev-lakehouse --profile dev-dbt --profile dev-flink-ui --profile dev-airflow
 
 # Local Flink runnable artifacts
 FLINK_MAIL_ROUTER_POM := platform/flink/jobs/mail_lifecycle_router/java/pom.xml
@@ -66,7 +66,7 @@ PYTHON_WHEEL_PROJECTS := \
 # Target Registry
 # =============================================================================
 
-.PHONY: help check-tools local-ci ci-render-all ci-render-dev ci-render-qa ci-render-stg ci-render-prod ci-validate-prod-hardening local-cd cd-dev cd-qa cd-stg cd-prod health-dev health-qa health-stg health-prod rollback-prod build-artifacts build-maven-all build-python-wheels dev_stack_up dev-stack-up dev-bootstrap dev-producers-up dev-producers-logs dev-cdc-bridge dev-flink-mail-router dev-flink-ops-router dev-flink-all dev-flink-jobs dev-flink-ui-up dev-flink-ui-logs dev-produce-analytics dev-peek-tracking dev-peek-dashboard dev-peek-analytics dev-lakehouse-up dev-lakehouse-logs dev-lakehouse-smoke dev-dbt-up dev-dbt-down dev-dbt-deps dev-dbt-debug dev-dbt-build dev-dbt-seed-large dev-observability-up dev-observability-down dev-es-setup dev-kibana-import dev-pipeline-smoke dev-stack-down clean
+.PHONY: help check-tools local-ci ci-render-all ci-render-dev ci-render-qa ci-render-stg ci-render-prod ci-validate-prod-hardening local-cd cd-dev cd-qa cd-stg cd-prod health-dev health-qa health-stg health-prod rollback-prod build-artifacts build-maven-all build-python-wheels dev_stack_up dev-stack-up dev-bootstrap dev-producers-up dev-producers-logs dev-cdc-bridge dev-flink-mail-router dev-flink-ops-router dev-flink-all dev-flink-jobs dev-flink-ui-up dev-flink-ui-logs dev-produce-analytics dev-peek-tracking dev-peek-dashboard dev-peek-analytics dev-lakehouse-up dev-lakehouse-logs dev-lakehouse-smoke dev-dbt-up dev-dbt-down dev-dbt-deps dev-dbt-debug dev-dbt-build dev-dbt-seed-large dev-airflow-up dev-airflow-down dev-airflow-logs dev-observability-up dev-observability-down dev-es-setup dev-kibana-import dev-pipeline-smoke dev-stack-down clean
 
 # =============================================================================
 # Help
@@ -103,6 +103,9 @@ help:
 	@echo "  dev-dbt-debug               Validate Snowflake connectivity/profile (dbt debug)"
 	@echo "  dev-dbt-build               Run dbt semantic models against Snowflake"
 	@echo "  dev-dbt-seed-large          Load 12k-row synthetic data into Snowflake source tables"
+	@echo "  dev-airflow-up              Start local Airflow UI with repository DAGs mounted"
+	@echo "  dev-airflow-down            Stop local Airflow container"
+	@echo "  dev-airflow-logs            Tail local Airflow logs"
 	@echo "  dev-observability-up        Start Elasticsearch and Kibana containers (dev-observability profile)"
 	@echo "  dev-observability-down      Stop Elasticsearch and Kibana containers"
 	@echo "  dev-es-setup                Register ingest pipeline and apply index templates to local Elasticsearch"
@@ -273,6 +276,12 @@ dev-dbt-up:
 
 dev-dbt-down:
 	$(DC) --profile dev-dbt stop $(DBT_SERVICE)
+
+$(eval $(call PROFILE_UP_TARGET,dev-airflow-up,dev-airflow,airflow))
+$(eval $(call LOGS_TARGET,dev-airflow-logs,airflow))
+
+dev-airflow-down:
+	$(DC) --profile dev-airflow stop airflow
 
 $(eval $(call DBT_CMD_TARGET,dev-dbt-deps,deps))
 $(eval $(call DBT_CMD_TARGET,dev-dbt-debug,debug --target $(DBT_TARGET)))

@@ -1,4 +1,4 @@
-# Helm deployment assets
+# Helm Deployment Guide
 
 ## Purpose
 
@@ -27,29 +27,23 @@ helm template etp-platform infra/helm/charts/platform \
   -f infra/helm/values/qa/platform-values.yaml
 ```
 
-Deploy QA:
+Environment deployment matrix:
+
+| Environment | Release name | Namespace | Values file |
+| --- | --- | --- | --- |
+| QA | `etp-platform-qa` | `qa-platform` | `infra/helm/values/qa/platform-values.yaml` |
+| staging | `etp-platform-stg` | `stg-platform` | `infra/helm/values/stg/platform-values.yaml` |
+| production | `etp-platform-prod` | `prod-platform` | `infra/helm/values/prod/platform-values.yaml` |
+
+Deploy command pattern:
 
 ```bash
-helm upgrade --install etp-platform-qa infra/helm/charts/platform \
-  -n qa-platform --create-namespace \
-  -f infra/helm/values/qa/platform-values.yaml
+helm upgrade --install <RELEASE_NAME> infra/helm/charts/platform \
+  -n <NAMESPACE> --create-namespace \
+  -f <VALUES_FILE>
 ```
 
-Deploy staging:
-
-```bash
-helm upgrade --install etp-platform-stg infra/helm/charts/platform \
-  -n stg-platform --create-namespace \
-  -f infra/helm/values/stg/platform-values.yaml
-```
-
-Deploy production:
-
-```bash
-helm upgrade --install etp-platform-prod infra/helm/charts/platform \
-  -n prod-platform --create-namespace \
-  -f infra/helm/values/prod/platform-values.yaml
-```
+For promotion order, approval gates, rollback flow, and health checks, use [../../docs/runbooks/prod-rollback-healthcheck.md](../../docs/runbooks/prod-rollback-healthcheck.md).
 
 ## Production hardening
 

@@ -1,4 +1,4 @@
-# CI/CD automation, production rollback, and health-check runbook
+# CI/CD, Production Rollback, and Health-Check Runbook
 
 ## Purpose
 
@@ -12,6 +12,8 @@ Applies to Helm-managed releases of the platform chart in:
 - `qa-platform`
 - `stg-platform`
 - `prod-platform`
+
+Naming note: this runbook uses `stg` for Kubernetes namespaces and Helm value paths, while architecture docs may spell out `staging` for readability.
 
 ## Inputs
 

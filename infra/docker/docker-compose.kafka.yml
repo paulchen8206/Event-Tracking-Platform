@@ -339,6 +339,46 @@ services:
       - -lc
       - cp -n profiles.example.yml profiles.yml && tail -f /dev/null
 
+  # ── Airflow local runtime (DAG deployment + UI) ──────────────────────────
+
+  airflow:
+    profiles:
+      - dev-airflow
+    image: apache/airflow:2.10.4-python3.11
+    container_name: etp-airflow
+    hostname: airflow
+    user: "${AIRFLOW_UID:-50000}:0"
+    ports:
+      - "8090:8080"
+    volumes:
+      - ../../platform/airflow/dags:/opt/airflow/dags
+      - ../../platform/airflow/include:/opt/airflow/include
+      - airflow-data:/opt/airflow
+    environment:
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      AIRFLOW__CORE__EXECUTOR: SequentialExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: sqlite:////opt/airflow/airflow.db
+      _AIRFLOW_WWW_USER_USERNAME: ${AIRFLOW_USER:-admin}
+      _AIRFLOW_WWW_USER_PASSWORD: ${AIRFLOW_PASSWORD:-admin}
+      ORCHESTRATION_API_BASE_URL: ${ORCHESTRATION_API_BASE_URL:-http://orchestration-api:8088}
+      WRAPPER_API_TIMEOUT_SECONDS: ${WRAPPER_API_TIMEOUT_SECONDS:-300}
+      DBT_TARGET: ${DBT_TARGET:-dev}
+    entrypoint:
+      - /bin/bash
+      - -lc
+    command:
+      - |
+        airflow db migrate && \
+        airflow users create \
+          --role Admin \
+          --username "${AIRFLOW_USER:-admin}" \
+          --password "${AIRFLOW_PASSWORD:-admin}" \
+          --email admin@example.com \
+          --firstname Airflow \
+          --lastname Admin || true
+        airflow scheduler &
+        exec airflow webserver
+
   mail-tracking-event-producer:
     <<: *event_producer_common
     container_name: etp-mail-tracking-event-producer
@@ -360,3 +400,6 @@ services:
       test:
         - CMD-SHELL
         - test -f /tmp/mail-tracking-event-producer.status && grep -Eq 'ready|running|completed' /tmp/mail-tracking-event-producer.status
+
+volumes:
+  airflow-data:

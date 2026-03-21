@@ -1,4 +1,4 @@
-# Kafka Schemas
+# Kafka Schema Assets
 
 Avro schemas under `avro/` are the transport schemas registered with Schema Registry for Kafka value serialization.
 

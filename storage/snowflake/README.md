@@ -1,4 +1,4 @@
-# Snowflake Storage Assets
+# Snowflake Storage and Schema Assets
 
 Schema DDL and data seeding scripts for the Snowflake source tables consumed by the dbt semantic layer.
 

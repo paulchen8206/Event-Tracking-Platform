@@ -1,4 +1,4 @@
-# dbt Mart Layout
+# dbt Mart Model Layout
 
 The marts layer is split by consumer type so shared lifecycle logic can be reused without mixing externally curated analytics models with internal operational monitoring models.
 

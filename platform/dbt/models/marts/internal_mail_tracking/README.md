@@ -1,4 +1,4 @@
-# Internal Mail Tracking Marts
+# Internal Mail Tracking Mart Models
 
 Use this folder for models that support internal workflow visibility, support investigations, and operational monitoring.
 

@@ -1,6 +1,6 @@
-# Kibana Assets
+# Kibana Dashboard Assets
 
-Starter saved-object assets for operational dashboards.
+Saved-object assets for operational dashboards.
 
 ## Internal Mail Tracking Operational Dashboard
 
@@ -43,4 +43,4 @@ curl -sS -X POST "http://localhost:5601/api/saved_objects/_import?overwrite=true
   -F file=@storage/elasticsearch/kibana/internal-mail-tracking-deadletter-dashboard.json
 ```
 
-Kibana version note: starter assets target Kibana 8.x saved object format. Adjust `migrationVersion` fields if deploying against a different major version.
+Kibana version note: these assets target Kibana 8.x saved object format. Adjust `migrationVersion` fields if deploying against a different major version.

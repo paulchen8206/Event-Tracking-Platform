@@ -29,9 +29,15 @@ DBT_CUSTOMER_SELECT = _env(
     "DBT_CUSTOMER_SELECT", "staging.customer_analytics+ marts.customer_analytics"
 )
 DBT_INTERNAL_SELECT = _env("DBT_INTERNAL_SELECT", "marts.internal_mail_tracking")
+DBT_SOURCE_SELECT = _env("DBT_SOURCE_SELECT", "source:iceberg_customer_analytics")
+DBT_STAGING_SELECT = _env("DBT_STAGING_SELECT", "staging.customer_analytics")
+DBT_INTERMEDIATE_SELECT = _env("DBT_INTERMEDIATE_SELECT", "intermediate.customer_analytics")
+DBT_MARTS_SELECT = _env(
+    "DBT_MARTS_SELECT", "marts.customer_analytics marts.internal_mail_tracking"
+)
 
 ORCHESTRATION_TRIGGER_DAG_ID = _env(
-    "ORCHESTRATION_TRIGGER_DAG_ID", "spark_dbt_dependency_orchestrator"
+    "ORCHESTRATION_TRIGGER_DAG_ID", "spark_dbt_pipeline_orchestrator"
 )
 KAFKA_BOOTSTRAP_SERVERS = _env("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")
 S3_ENDPOINT = _env("S3_ENDPOINT", "http://localhost:9000")

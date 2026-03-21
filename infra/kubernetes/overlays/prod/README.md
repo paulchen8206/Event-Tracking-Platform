@@ -1,4 +1,4 @@
-# Production Overlay
+# Kubernetes Production Overlay
 
 This overlay contains production namespace and baseline guardrails:
 

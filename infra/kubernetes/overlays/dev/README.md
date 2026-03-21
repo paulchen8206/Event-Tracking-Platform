@@ -1,4 +1,4 @@
-# Development Overlay
+# Kubernetes Development Overlay
 
 This overlay contains development namespace and baseline guardrails:
 

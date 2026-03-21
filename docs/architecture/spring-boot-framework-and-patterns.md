@@ -1,4 +1,4 @@
-# Spring Boot Framework and Design Patterns
+# Spring Boot Architecture and Design Patterns
 
 ## Purpose
 
@@ -121,8 +121,8 @@ flowchart LR
 
 ## Related documents
 
-- `docs/architecture/system-architecture.md`
-- `docs/architecture/deployment-architecture.md`
-- `docs/architecture/deployment-runtime-topology.md`
-- `docs/adr/0004-decouple-stream-processing-and-search-sinks-with-kafka-connect.md`
-- `docs/adr/0005-dead-letter-topic-strategy-for-malformed-operational-events.md`
+- [system-architecture.md](system-architecture.md)
+- [deployment-architecture.md](deployment-architecture.md)
+- [deployment-runtime-topology.md](deployment-runtime-topology.md)
+- [../adr/0005-decouple-stream-processing-and-search-sinks-with-kafka-connect.md](../adr/0005-decouple-stream-processing-and-search-sinks-with-kafka-connect.md)
+- [../adr/0006-dead-letter-topic-strategy-for-malformed-operational-events.md](../adr/0006-dead-letter-topic-strategy-for-malformed-operational-events.md)

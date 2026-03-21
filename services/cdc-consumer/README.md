@@ -1,8 +1,10 @@
-# Java CDC Producer Example
+# Java CDC Consumer Bridge Service
 
-This module provides a Java example that consumes Debezium-style PostgreSQL CDC events and publishes canonical Avro events into Kafka.
+## Purpose
 
-## Environment Variables
+This module provides a Java bridge application that consumes Debezium-style PostgreSQL CDC events and publishes canonical Avro events into Kafka.
+
+## Environment variables
 
 - `KAFKA_BOOTSTRAP_SERVERS` (default: `localhost:9092`)
 - `SCHEMA_REGISTRY_URL` (default: `http://localhost:8081`)
@@ -24,7 +26,12 @@ mvn -q -DskipTests package
 java -jar target/cdc-consumer-0.1.0-SNAPSHOT.jar
 ```
 
-Notes:
+## Notes
 
 - The mapper is intentionally conservative and emits minimal canonical metadata.
 - Adapt field extraction for your specific Debezium payload shape and table schema.
+
+## Related documents
+
+- [../README.md](../README.md)
+- [../../platform/kafka/README.md](../../platform/kafka/README.md)

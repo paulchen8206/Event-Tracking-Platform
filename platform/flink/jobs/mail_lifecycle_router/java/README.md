@@ -1,4 +1,4 @@
-# Java Flink Router Example
+# Mail Lifecycle Router Java Flink Job
 
 This module contains a Java Flink DataStream job that consumes one Kafka topic and routes records into internal Kafka topics.
 

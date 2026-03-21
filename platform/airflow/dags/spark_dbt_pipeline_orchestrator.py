@@ -59,13 +59,14 @@ def _post_json(path: str, payload: dict[str, object]) -> None:
 
 
 with DAG(
-    dag_id="spark_dbt_dependency_orchestrator",
+    dag_id="spark_dbt_pipeline_orchestrator",
     default_args=default_args,
     description="Runs Spark apps and dbt transformations with explicit dependencies.",
     schedule=None,
     start_date=datetime(2026, 3, 19),
     catchup=False,
     max_active_runs=1,
+    max_active_tasks=6,
     tags=["spark", "dbt", "orchestration"],
 ) as dag:
     start = EmptyOperator(task_id="start")
@@ -126,6 +127,10 @@ with DAG(
             execution_timeout=timedelta(minutes=60),
         )
 
-        chain(dbt_deps, dbt_debug, dbt_build_customer, dbt_build_internal)
+        dbt_builds_complete = EmptyOperator(task_id="dbt_builds_complete")
+
+        chain(dbt_deps, dbt_debug)
+        dbt_debug >> [dbt_build_customer, dbt_build_internal]
+        [dbt_build_customer, dbt_build_internal] >> dbt_builds_complete
 
     chain(start, spark_apps_group, dbt_group, end)

@@ -1,10 +1,12 @@
-# Local development with pure Docker Compose
+# Local Development Runbook (Docker Compose)
 
 ## Purpose
 
 This runbook describes the pure Docker Compose development option for teams that want fast local iteration without Kubernetes pods.
 
 ## Decision matrix
+
+Canonical option-selection guidance is maintained in [../architecture/deployment-architecture.md](../architecture/deployment-architecture.md). The table below is a quick local summary.
 
 | Use case | Recommended option | Why |
 | --- | --- | --- |
@@ -111,11 +113,12 @@ make dev-lakehouse-up
 
 Open these URLs:
 
-- Kafka UI: http://localhost:8080
-- Spark UI: http://localhost:4040
-- Flink Dashboard: http://localhost:8088
-- Elasticsearch: http://localhost:9200
-- Kibana: http://localhost:5601
+- Kafka UI: <http://localhost:8080>
+- Spark UI: <http://localhost:4040>
+- Flink Dashboard: <http://localhost:8088>
+- Airflow UI: <http://localhost:8090>
+- Elasticsearch: <http://localhost:9200>
+- Kibana: <http://localhost:5601>
 
 Notes:
 
@@ -166,7 +169,7 @@ Import Kibana dashboards:
 make dev-kibana-import
 ```
 
-Open Kibana at http://localhost:5601. The **Internal Mail Tracking Operational Overview** dashboard gives real-time visibility into event volume, type distribution, tenant activity, and delivery status. The **DLQ** dashboard monitors malformed records routed through Kafka Connect dead-letter handling.
+Open Kibana at <http://localhost:5601>. The **Internal Mail Tracking Operational Overview** dashboard gives real-time visibility into event volume, type distribution, tenant activity, and delivery status. The **DLQ** dashboard monitors malformed records routed through Kafka Connect dead-letter handling.
 
 Stop the observability stack:
 
@@ -191,8 +194,35 @@ make dev-dbt-down         # stop the container
 
 See [platform/dbt/README.md](../../platform/dbt/README.md) for full details.
 
+## Airflow DAG Deployment (Local)
+
+The Compose file includes an optional `dev-airflow` profile that runs Airflow with repository DAGs mounted into the container.
+
+```bash
+make dev-airflow-up     # start Airflow and deploy DAG files from platform/airflow/dags
+make dev-airflow-logs   # tail Airflow logs
+```
+
+Open `http://localhost:8090` and sign in with:
+
+- username: `admin` (or `AIRFLOW_USER`)
+- password: `admin` (or `AIRFLOW_PASSWORD`)
+
+Mounted DAG path:
+
+- Host: `platform/airflow/dags`
+- Container: `/opt/airflow/dags`
+
+To stop Airflow:
+
+```bash
+make dev-airflow-down
+```
+
 ## Related documents
 
-- [docs/runbooks/local-dev-minikube.md](local-dev-minikube.md)
-- [platform/kafka/README.md](../../platform/kafka/README.md)
-- [platform/kafka/connect/README.md](../../platform/kafka/connect/README.md)
+- [local-dev-minikube.md](local-dev-minikube.md)
+- [../../platform/kafka/connect/README.md](../../platform/kafka/connect/README.md)
+- [../../platform/dbt/README.md](../../platform/dbt/README.md)
+- [../../platform/airflow/README.md](../../platform/airflow/README.md)
+- [../architecture/deployment-runtime-topology.md](../architecture/deployment-runtime-topology.md)

@@ -1,4 +1,4 @@
-# ADR 0004: Decouple Stream Processing and Search Sinks with Kafka Connect
+# ADR 0005: Decouple Stream Processing and Search Sinks with Kafka Connect
 
 - Status: Accepted
 - Date: 2026-03-19

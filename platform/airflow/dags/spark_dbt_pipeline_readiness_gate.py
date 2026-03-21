@@ -93,13 +93,14 @@ default_args = {
 
 
 with DAG(
-    dag_id="spark_dbt_readiness_gate",
+    dag_id="spark_dbt_pipeline_readiness_gate",
     default_args=default_args,
     description="Blocks orchestration until Kafka and S3 upstream dependencies are reachable.",
     schedule="0 * * * *",
     start_date=datetime(2026, 3, 19),
     catchup=False,
     max_active_runs=1,
+    max_active_tasks=4,
     tags=["spark", "dbt", "readiness", "sensor"],
 ) as dag:
     start = EmptyOperator(task_id="start")
@@ -129,7 +130,7 @@ with DAG(
     )
 
     trigger_orchestration = TriggerDagRunOperator(
-        task_id="trigger_spark_dbt_dependency_orchestrator",
+        task_id="trigger_spark_dbt_pipeline_orchestrator",
         trigger_dag_id=ORCHESTRATION_TRIGGER_DAG_ID,
         wait_for_completion=False,
         reset_dag_run=False,
@@ -137,4 +138,4 @@ with DAG(
 
     end = EmptyOperator(task_id="end")
 
-    chain(start, kafka_ready, s3_ready, orchestration_api_ready, trigger_orchestration, end)
+    start >> [kafka_ready, s3_ready, orchestration_api_ready] >> trigger_orchestration >> end

@@ -1,4 +1,4 @@
-# Shared Marts
+# Shared Mart Models
 
 Use this folder for conformed dimensions and reusable facts that support more than one consumer group.
 

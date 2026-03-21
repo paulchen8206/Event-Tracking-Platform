@@ -1,4 +1,4 @@
-# ADR 0007: Deploy Airflow Workloads as Kubernetes Pods
+# ADR 0004: Deploy Airflow Workloads as Kubernetes Pods
 
 - Status: Accepted
 - Date: 2026-03-19

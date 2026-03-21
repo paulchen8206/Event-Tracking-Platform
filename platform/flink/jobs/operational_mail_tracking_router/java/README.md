@@ -1,4 +1,4 @@
-# Operational Mail Tracking Router
+# Operational Mail Tracking Router Java Flink Job
 
 Java Flink job that consumes operational mail tracking events from Kafka, enriches them for dashboard use, and republishes to internal Kafka topics. Elasticsearch indexing is handled downstream by Kafka Connect for loose coupling.
 

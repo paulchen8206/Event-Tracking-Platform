@@ -1,4 +1,4 @@
-# Customer Analytics Marts
+# Customer Analytics Mart Models
 
 Use this folder for curated models exposed to customer-facing dashboards, reports, or APIs.
 

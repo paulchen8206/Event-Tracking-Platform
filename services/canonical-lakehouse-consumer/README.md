@@ -1,8 +1,8 @@
-# Canonical Lakehouse Consumer
+# Canonical Lakehouse Consumer Service
 
 Spring Boot application that starts a Spark Structured Streaming job to consume customer-facing analytics events from Kafka and write Tableau-ready Iceberg assets on S3 lakehouse storage.
 
-## What It Does
+## What it does
 
 - Reads from the customer analytics Kafka topic by default (`evt.mail.customer.analytics`)
 - Parses customer-safe event records into a raw landing Iceberg table
@@ -10,13 +10,13 @@ Spring Boot application that starts a Spark Structured Streaming job to consume 
 - Refreshes Tableau-friendly assets on each micro-batch from the landing layer
 - Produces a reporting-oriented daily fact table and lightweight dimensions for tenants and event types
 
-## Intended Consumer
+## Intended consumers
 
 - Customer-facing analytics dashboards
 - Tableau reporting datasets and scheduled extracts
 - Tenant-scoped delivery and engagement reporting
 
-## Output Tables
+## Output tables
 
 - Landing table: `lakehouse.customer_analytics.tableau_reporting_events`
 - Tenant dimension: `lakehouse.customer_analytics.dim_customer_tenant`
@@ -36,7 +36,7 @@ mvn -q -DskipTests package
 java -jar target/canonical-lakehouse-consumer-0.1.0-SNAPSHOT.jar
 ```
 
-## Important Environment Variables
+## Important environment variables
 
 - `KAFKA_BOOTSTRAP_SERVERS`
 - `CANONICAL_KAFKA_TOPIC`

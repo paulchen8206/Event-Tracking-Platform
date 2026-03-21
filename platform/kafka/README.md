@@ -1,4 +1,4 @@
-# Kafka platform assets
+# Kafka Platform Guide
 
 ## Purpose
 

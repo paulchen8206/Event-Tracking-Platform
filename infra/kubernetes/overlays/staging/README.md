@@ -1,4 +1,4 @@
-# Staging Overlay
+# Kubernetes Staging Overlay
 
 This overlay contains staging namespace and baseline guardrails:
 

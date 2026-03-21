@@ -1,4 +1,4 @@
-# Kafka Connect Assets
+# Kafka Connect Configuration Assets
 
 Connector definitions that bridge internal Kafka topics to downstream systems.
 

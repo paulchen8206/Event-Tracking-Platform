@@ -1,4 +1,4 @@
-# Event Contracts
+# Event Contract Definitions
 
 This directory holds canonical event schemas used across ingestion, streaming, warehousing, and serving layers.
 

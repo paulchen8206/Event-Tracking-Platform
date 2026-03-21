@@ -1,8 +1,12 @@
-# Local development with Minikube (Docker driver)
+# Local Development Runbook (Minikube Docker Driver)
+
+## Purpose
 
 This runbook provisions a local Kubernetes development environment for this repository using Minikube on top of Docker.
 
 ## Decision matrix
+
+Canonical option-selection guidance is maintained in [../architecture/deployment-architecture.md](../architecture/deployment-architecture.md). The table below is a quick local summary.
 
 | Use case | Recommended option | Why |
 | --- | --- | --- |
@@ -14,6 +18,12 @@ This runbook provisions a local Kubernetes development environment for this repo
 
 If your goal includes Kubernetes parity, use Minikube. If your goal is lightweight local integration speed, use pure Docker Compose.
 
+## Scope
+
+This runbook covers local Kubernetes bootstrap, environment overlay apply, verification, and cleanup for the development profile.
+
+For a lightweight local option without Kubernetes pod scheduling, use [local-dev-docker-compose.md](local-dev-docker-compose.md).
+
 ## Prerequisites
 
 - Docker Desktop running
@@ -22,18 +32,24 @@ If your goal includes Kubernetes parity, use Minikube. If your goal is lightweig
 
 macOS installation example:
 
-- `brew install minikube kubectl`
+```bash
+brew install minikube kubectl
+```
 
 ## Bootstrap
 
 From repository root:
 
-- `scripts/dev/setup_minikube_docker.sh`
+```bash
+scripts/dev/setup_minikube_docker.sh
+```
 
 Optional tuning:
 
-- `scripts/dev/setup_minikube_docker.sh --profile etp-dev --cpus 6 --memory 12288 --disk-size 60g`
-- `scripts/dev/setup_minikube_docker.sh --skip-overlay-apply`
+```bash
+scripts/dev/setup_minikube_docker.sh --profile etp-dev --cpus 6 --memory 12288 --disk-size 60g
+scripts/dev/setup_minikube_docker.sh --skip-overlay-apply
+```
 
 What the setup script does:
 
@@ -44,18 +60,28 @@ What the setup script does:
 
 ## Verify
 
-- `kubectl config current-context`
-- `kubectl get nodes`
-- `kubectl get ns | grep dev-`
-- `kubectl get networkpolicy -A`
+```bash
+kubectl config current-context
+kubectl get nodes
+kubectl get ns | grep dev-
+kubectl get networkpolicy -A
+```
 
 ## Clean up
 
-- `scripts/dev/delete_minikube_docker.sh`
-- `scripts/dev/delete_minikube_docker.sh --profile etp-dev`
+```bash
+scripts/dev/delete_minikube_docker.sh
+scripts/dev/delete_minikube_docker.sh --profile etp-dev
+```
 
 ## Notes
 
 - If Docker is not running, setup fails fast with a clear message.
 - If your machine is resource constrained, lower CPU and memory values.
 - The profile defaults to `etp-dev` to avoid colliding with a default Minikube profile.
+
+## Related documents
+
+- [local-dev-docker-compose.md](local-dev-docker-compose.md)
+- [../../infra/kubernetes/base/README.md](../../infra/kubernetes/base/README.md)
+- [../../infra/kubernetes/overlays/dev/README.md](../../infra/kubernetes/overlays/dev/README.md)

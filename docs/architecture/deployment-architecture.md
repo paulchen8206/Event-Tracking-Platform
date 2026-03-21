@@ -1,10 +1,10 @@
-# Deployment Architecture
+# Event Tracking Platform Deployment Architecture
 
 ## Purpose
 
 This document describes how the platform is deployed across local development and shared environments, and how infrastructure components map to each stage.
 
-For namespace-level runtime placement, promotion flow, and environment delta details, see `deployment-runtime-topology.md`.
+For namespace-level runtime placement, promotion flow, and environment delta details, see [deployment-runtime-topology.md](deployment-runtime-topology.md).
 
 ## Deployment View
 
@@ -88,7 +88,7 @@ Developers should choose Option A for deployment parity tests and Option B for f
 - Promotions use immutable artifacts from lower to higher environments.
 - QA, staging, and production are deployed through Helm with environment-specific values.
 - QA keeps minimal pod configuration (low replica counts and lower resource requests/limits) while preserving production-like topology.
-- Detailed per-environment runtime deltas are maintained in deployment-runtime-topology.md to avoid duplicated diagram maintenance.
+- Detailed per-environment runtime deltas are maintained in [deployment-runtime-topology.md](deployment-runtime-topology.md) to avoid duplicated diagram maintenance.
 
 ### Production
 
@@ -99,13 +99,13 @@ Developers should choose Option A for deployment parity tests and Option B for f
 
 ## Control Planes and Tooling
 
-- Kubernetes manifests and overlays: infra/kubernetes
-- Helm chart deployments for QA/staging/production: infra/helm
-- Local cluster bootstrap: scripts/dev/setup_minikube_docker.sh
-- Overlay deployment helper: scripts/dev/apply_k8s_overlay.sh
-- Local Kafka ecosystem stack: infra/docker/docker-compose.kafka.yml
-- Pure Compose runbook: docs/runbooks/local-dev-docker-compose.md
-- Dead-letter smoke validation: scripts/dev/smoke_test_kafka_connect_dlq.sh
+- Kubernetes manifests and overlays: [../../infra/kubernetes](../../infra/kubernetes)
+- Helm chart deployments for QA/staging/production: [../../infra/helm](../../infra/helm)
+- Local cluster bootstrap: [../../scripts/dev/setup_minikube_docker.sh](../../scripts/dev/setup_minikube_docker.sh)
+- Overlay deployment helper: [../../scripts/dev/apply_k8s_overlay.sh](../../scripts/dev/apply_k8s_overlay.sh)
+- Local Kafka ecosystem stack: [../../infra/docker/docker-compose.kafka.yml](../../infra/docker/docker-compose.kafka.yml)
+- Pure Compose runbook: [../runbooks/local-dev-docker-compose.md](../runbooks/local-dev-docker-compose.md)
+- Dead-letter smoke validation: [../../scripts/dev/smoke_test_kafka_connect_dlq.sh](../../scripts/dev/smoke_test_kafka_connect_dlq.sh)
 
 ## Deployment Guardrails
 
@@ -119,6 +119,14 @@ Developers should choose Option A for deployment parity tests and Option B for f
 - ADR 0001: Base platform on Kubernetes in public cloud
 - ADR 0002: Namespace and tenancy strategy
 - ADR 0003: Managed versus self-hosted Kafka and Flink
-- ADR 0004: Decouple Flink and Elasticsearch with Kafka Connect
-- ADR 0005: Dead-letter strategy for malformed operational events
-- ADR 0006: Minikube Docker local development standard
+- ADR 0005: Decouple Flink and Elasticsearch with Kafka Connect
+- ADR 0006: Dead-letter strategy for malformed operational events
+- ADR 0007: Minikube Docker local development standard
+
+## Related documents
+
+- [system-architecture.md](system-architecture.md)
+- [deployment-runtime-topology.md](deployment-runtime-topology.md)
+- [../runbooks/local-dev-minikube.md](../runbooks/local-dev-minikube.md)
+- [../runbooks/local-dev-docker-compose.md](../runbooks/local-dev-docker-compose.md)
+- [../adr/README.md](../adr/README.md)

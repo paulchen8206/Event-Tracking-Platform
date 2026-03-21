@@ -1,6 +1,6 @@
-# Elasticsearch Assets
+# Elasticsearch Configuration Assets
 
-This directory contains index templates, ingest pipelines, and Kibana starter assets for internal operational dashboards.
+This directory contains index templates, ingest pipelines, and Kibana dashboard assets for internal operational dashboards.
 
 ## Local Development Setup
 
@@ -17,7 +17,7 @@ Register the Kafka Connect sink connectors next (see `platform/kafka/connect/REA
 make dev-kibana-import
 ```
 
-Open Kibana at http://localhost:5601.
+Open Kibana at <http://localhost:5601>.
 
 ## Manual Setup Steps
 

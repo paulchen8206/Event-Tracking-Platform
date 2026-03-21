@@ -1,4 +1,4 @@
-# dbt Semantic Layer
+# dbt Semantic Layer Guide
 
 This dbt project builds Snowflake semantic models on top of Iceberg-backed customer analytics tables produced by the Spark lakehouse consumer.
 

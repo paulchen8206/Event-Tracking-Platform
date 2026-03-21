@@ -1,8 +1,8 @@
-# Deployment Runtime Topology
+# Event Tracking Platform Runtime Topology
 
 ## Purpose
 
-This document complements deployment-architecture.md by defining runtime placement details: namespace topology, component placement, network boundaries, and promotion flow across environments.
+This document complements [deployment-architecture.md](deployment-architecture.md) by defining runtime placement details: namespace topology, component placement, network boundaries, and promotion flow across environments.
 
 ## Runtime Topology Diagram
 
@@ -56,6 +56,40 @@ flowchart LR
     O11Y -. metrics/logs .-> FJM
 ```
 
+## Configuration Diagram (dev vs production)
+
+```mermaid
+flowchart LR
+    subgraph DEV[dev configuration]
+        D_K8S[Minikube or shared dev Kubernetes]
+        D_SIZING[Low to moderate resource profile]
+        D_SEC[Baseline guardrails and smoke checks]
+        D_DEPLOY[Overlay-driven deploy and fast iteration]
+    end
+
+    subgraph PROD[production configuration]
+        P_K8S[Dedicated/isolated Kubernetes boundary]
+        P_SIZING[HA and scale-oriented resource profile]
+        P_SEC[TLS, strict RBAC, NetworkPolicy, PDB, HPA]
+        P_DEPLOY[Helm release gates, rollback and health checks]
+    end
+
+    D_K8S --> P_K8S
+    D_SIZING --> P_SIZING
+    D_SEC --> P_SEC
+    D_DEPLOY --> P_DEPLOY
+```
+
+### Configuration focus areas
+
+| Area | dev | production |
+| --- | --- | --- |
+| Cluster posture | local/shared and iteration-focused | isolated and reliability-focused |
+| Capacity strategy | minimal to moderate sizing | HA sizing with resiliency headroom |
+| Security baseline | namespace guardrails and baseline policies | strict policy enforcement with production hardening |
+| Deployment controls | rapid overlay updates and smoke validation | gated Helm releases with rollback procedures |
+| Observability | developer troubleshooting visibility | SLO-driven monitoring and incident response |
+
 ## Environment delta summary
 
 The runtime wiring stays consistent across environments; only sizing, management model, and operability controls change.
@@ -67,7 +101,9 @@ The runtime wiring stays consistent across environments; only sizing, management
 | staging | Shared Kubernetes cluster | stg values | moderate | pre-production validation and approval gate |
 | production | Dedicated/isolated cluster boundary | prod values | scaled/HA | ingress TLS, HPA, PDB, NetworkPolicy, rollback controls |
 
-Use deployment-architecture.md for deployment options and this document's runtime topology diagram for communication flow.
+Naming note: this document uses `staging` in prose and topology labels; Helm values and some namespace/release identifiers use the `stg` shorthand.
+
+Use [deployment-architecture.md](deployment-architecture.md) for deployment options and this document's runtime topology diagram for communication flow.
 
 ## Namespace Placement
 
@@ -144,11 +180,11 @@ Promotion principles:
 
 ## Related documents
 
-- `docs/architecture/deployment-architecture.md`
-- `docs/architecture/system-architecture.md`
-- `docs/architecture/spring-boot-framework-and-patterns.md`
-- `docs/runbooks/local-dev-minikube.md`
-- `docs/adr/0002-kubernetes-namespace-and-tenancy-strategy.md`
-- `docs/adr/0003-managed-vs-self-hosted-kafka-flink.md`
-- `docs/adr/0004-decouple-stream-processing-and-search-sinks-with-kafka-connect.md`
-- `docs/adr/0007-deploy-airflow-workloads-as-kubernetes-pods.md`
+- [deployment-architecture.md](deployment-architecture.md)
+- [system-architecture.md](system-architecture.md)
+- [spring-boot-framework-and-patterns.md](spring-boot-framework-and-patterns.md)
+- [../runbooks/local-dev-minikube.md](../runbooks/local-dev-minikube.md)
+- [../adr/0002-kubernetes-namespace-and-tenancy-strategy.md](../adr/0002-kubernetes-namespace-and-tenancy-strategy.md)
+- [../adr/0003-managed-vs-self-hosted-kafka-flink.md](../adr/0003-managed-vs-self-hosted-kafka-flink.md)
+- [../adr/0005-decouple-stream-processing-and-search-sinks-with-kafka-connect.md](../adr/0005-decouple-stream-processing-and-search-sinks-with-kafka-connect.md)
+- [../adr/0004-deploy-airflow-workloads-as-kubernetes-pods.md](../adr/0004-deploy-airflow-workloads-as-kubernetes-pods.md)

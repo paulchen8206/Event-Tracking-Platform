@@ -1,4 +1,4 @@
-# Flink Jobs
+# Flink Job Catalog
 
 This directory holds deployable Flink jobs and job-specific metadata.
 

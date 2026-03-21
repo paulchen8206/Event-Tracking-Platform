@@ -1,4 +1,8 @@
-# Platform Use Cases
+# Event Tracking Platform Product Use Cases
+
+## Purpose
+
+This document defines the primary consumer use cases that drive architecture, data modeling, and serving-layer decisions across the platform.
 
 ## Primary Consumers
 
@@ -63,3 +67,10 @@ Design implications:
 - [storage/elasticsearch](../../storage/elasticsearch): Search-oriented operational views for investigation workflows
 - [services/orchestration-api](../../services/orchestration-api): API-driven orchestration surface for Spark and dbt workflows
 - [services/canonical-lakehouse-consumer](../../services/canonical-lakehouse-consumer): Customer analytics ingestion into Iceberg/S3 lakehouse tables
+
+## Related documents
+
+- [event-taxonomy.md](event-taxonomy.md)
+- [../architecture/system-architecture.md](../architecture/system-architecture.md)
+- [../runbooks/local-dev-minikube.md](../runbooks/local-dev-minikube.md)
+- [../runbooks/local-dev-docker-compose.md](../runbooks/local-dev-docker-compose.md)
