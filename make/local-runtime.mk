@@ -130,11 +130,19 @@ dev-dbt-up:
 dev-dbt-down:
 	$(DC) --profile dev-dbt stop $(DBT_SERVICE)
 
-$(eval $(call PROFILE_UP_TARGET,dev-airflow-up,dev-airflow,airflow))
+# Starts both Airflow and the orchestration-api sidecar it depends on.
+dev-airflow-up:
+	$(DC) --profile dev-airflow up -d --build airflow orchestration-api
+
 $(eval $(call LOGS_TARGET,dev-airflow-logs,airflow))
+$(eval $(call LOGS_TARGET,dev-orchestration-api-logs,orchestration-api))
+
+# Confirms orchestration-api is reachable from the host (host port 8091).
+dev-orchestration-api-health:
+	curl -fsS http://localhost:8091/health
 
 dev-airflow-down:
-	$(DC) --profile dev-airflow stop airflow
+	$(DC) --profile dev-airflow stop airflow orchestration-api
 
 $(eval $(call DBT_CMD_TARGET,dev-dbt-deps,deps))
 $(eval $(call DBT_CMD_TARGET,dev-dbt-debug,debug --target $(DBT_TARGET)))

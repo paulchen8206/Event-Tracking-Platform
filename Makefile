@@ -113,7 +113,7 @@ include make/observability.mk
 # Target Registry
 # =============================================================================
 
-.PHONY: help check-tools local-ci ci-render-all ci-render-dev ci-render-qa ci-render-stg ci-render-prod ci-validate-prod-hardening local-cd cd-dev cd-qa cd-stg cd-prod health-dev health-qa health-stg health-prod rollback-prod build-artifacts build-maven-all build-python-wheels dev_stack_up dev-stack-up dev-bootstrap dev-producers-up dev-producers-logs dev-cdc-bridge dev-flink-mail-router dev-flink-ops-router dev-flink-all dev-flink-jobs dev-flink-ui-up dev-flink-ui-logs dev-produce-analytics dev-peek-tracking dev-peek-dashboard dev-peek-analytics dev-lakehouse-up dev-lakehouse-logs dev-lakehouse-smoke dev-dbt-up dev-dbt-down dev-dbt-deps dev-dbt-debug dev-dbt-build dev-dbt-seed-large dev-airflow-up dev-airflow-down dev-airflow-logs dev-observability-up dev-observability-down dev-observability-setup dev-es-setup dev-connect-setup dev-connect-status dev-connect-logs dev-connect-health dev-connect-dlq-smoke dev-kibana-import dev-pipeline-smoke dev-stack-down clean
+.PHONY: help check-tools local-ci ci-render-all ci-render-dev ci-render-qa ci-render-stg ci-render-prod ci-validate-prod-hardening local-cd cd-dev cd-qa cd-stg cd-prod health-dev health-qa health-stg health-prod rollback-prod build-artifacts build-maven-all build-python-wheels dev_stack_up dev-stack-up dev-bootstrap dev-producers-up dev-producers-logs dev-cdc-bridge dev-flink-mail-router dev-flink-ops-router dev-flink-all dev-flink-jobs dev-flink-ui-up dev-flink-ui-logs dev-produce-analytics dev-peek-tracking dev-peek-dashboard dev-peek-analytics dev-lakehouse-up dev-lakehouse-logs dev-lakehouse-smoke dev-dbt-up dev-dbt-down dev-dbt-deps dev-dbt-debug dev-dbt-build dev-dbt-seed-large dev-airflow-up dev-airflow-down dev-airflow-logs dev-orchestration-api-logs dev-orchestration-api-health dev-observability-up dev-observability-down dev-observability-setup dev-es-setup dev-connect-setup dev-connect-status dev-connect-logs dev-connect-health dev-connect-dlq-smoke dev-kibana-import dev-pipeline-smoke dev-stack-down clean
 
 # =============================================================================
 # Help
@@ -158,9 +158,11 @@ help:
 	@echo "  dev-dbt-debug               Validate Snowflake connectivity/profile (dbt debug)"
 	@echo "  dev-dbt-build               Run dbt semantic models against Snowflake"
 	@echo "  dev-dbt-seed-large          Load 12k-row synthetic data into Snowflake source tables"
-	@echo "  dev-airflow-up              Start local Airflow UI with repository DAGs mounted"
-	@echo "  dev-airflow-down            Stop local Airflow container"
+	@echo "  dev-airflow-up              Start Airflow UI and orchestration-api sidecar"
+	@echo "  dev-airflow-down            Stop Airflow and orchestration-api containers"
 	@echo "  dev-airflow-logs            Tail local Airflow logs"
+	@echo "  dev-orchestration-api-logs  Tail orchestration-api logs"
+	@echo "  dev-orchestration-api-health  Check orchestration-api /health endpoint"
 	@echo ""
 	@echo "Observability:"
 	@echo "  dev-observability-up        Start Elasticsearch and Kibana containers (dev-observability profile)"

@@ -379,6 +379,39 @@ services:
         airflow scheduler &
         exec airflow webserver
 
+  # ── Orchestration API (Spark/dbt command wrapper for Airflow DAGs) ───────
+
+  orchestration-api:
+    profiles:
+      - dev-airflow
+    build:
+      context: ../../services/orchestration-api
+      dockerfile: Dockerfile
+    image: etp-orchestration-api:dev
+    container_name: etp-orchestration-api
+    hostname: orchestration-api
+    ports:
+      - "8091:8088"
+    volumes:
+      - ../../platform/dbt:/opt/airflow/platform/dbt
+    env_file:
+      - ../../.env
+    environment:
+      DBT_PROJECT_DIR: /opt/airflow/platform/dbt
+      DBT_PROFILES_DIR: /opt/airflow/platform/dbt
+      DBT_TARGET: ${DBT_TARGET:-dev}
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - curl -fsS http://localhost:8088/health >/dev/null
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    depends_on:
+      airflow:
+        condition: service_started
+
   mail-tracking-event-producer:
     <<: *event_producer_common
     container_name: etp-mail-tracking-event-producer

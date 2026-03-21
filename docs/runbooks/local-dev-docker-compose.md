@@ -176,6 +176,7 @@ make dev-observability-down
 | Schema Registry | <http://localhost:8081> | `make dev-stack-up` |
 | Kafka Connect | <http://localhost:8083> | `make dev-stack-up` |
 | Flink Dashboard | <http://localhost:8088> | `make dev-flink-ui-up` |
+| Orchestration API | <http://localhost:8091> | `make dev-airflow-up` |
 | Elasticsearch | <http://localhost:9200> | `make dev-observability-up` |
 | Kibana | <http://localhost:5601> | `make dev-observability-up` |
 | Spark UI | <http://localhost:4040> | `make dev-lakehouse-up` |
